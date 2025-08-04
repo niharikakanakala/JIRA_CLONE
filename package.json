@@ -1,5 +1,6 @@
 {
-  "name": "my-app",
+  "name": "jira-clone",
+  "homepage": "https://projects.hackerearth.com/p11/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
