@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Badge, Typography, Empty } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import TaskCard from './TaskCard';
 
 const { Text, Title } = Typography;
 
 const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnIndex }) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -39,35 +41,68 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
     }
   };
 
-  // Better responsive dimensions
   const getColumnHeight = () => {
-    if (screenSize === 'mobile') return 'calc((100vh - 80px) / 2 - 8px)'; // Half height for 2x2 grid
-    return 'calc(100vh - 140px)'; // Full height for single row
+    if (screenSize === 'mobile') return 'calc((100vh - 80px) / 2 - 8px)';
+    return 'calc(100vh - 140px)';
   };
 
   const getPadding = () => {
-    if (screenSize === 'mobile') return '8px';
-    if (screenSize === 'tablet') return '12px';
-    return '16px';
+    if (screenSize === 'mobile') return '12px';
+    if (screenSize === 'tablet') return '16px';
+    return '20px';
   };
 
   const getMinWidth = () => {
-    if (screenSize === 'mobile') return '150px';
-    if (screenSize === 'tablet') return '200px';
-    return '250px';
+    if (screenSize === 'mobile') return '160px';
+    if (screenSize === 'tablet') return '220px';
+    return '280px';
   };
 
-  const getColumnBackground = (columnKey) => {
+  const getColumnConfig = (columnKey) => {
     switch (columnKey) {
-      case 'todo': return '#f7f8fc';
-      case 'progress': return '#e3fcef';
-      case 'review': return '#fff4e6';
-      case 'done': return '#e3fcef';
-      default: return '#f7f8fc';
+      case 'todo': 
+        return { 
+          bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          lightBg: '#f8faff',
+          accentColor: '#667eea',
+          emoji: '📋',
+          hoverBg: 'linear-gradient(135deg, #667eea 10%, #764ba2 90%)'
+        };
+      case 'progress': 
+        return { 
+          bg: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+          lightBg: '#fff8f9',
+          accentColor: '#f093fb',
+          emoji: '⚡',
+          hoverBg: 'linear-gradient(135deg, #f093fb 10%, #f5576c 90%)'
+        };
+      case 'review': 
+        return { 
+          bg: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+          lightBg: '#f7fdff',
+          accentColor: '#4facfe',
+          emoji: '👀',
+          hoverBg: 'linear-gradient(135deg, #4facfe 10%, #00f2fe 90%)'
+        };
+      case 'done': 
+        return { 
+          bg: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+          lightBg: '#f7fffc',
+          accentColor: '#43e97b',
+          emoji: '✅',
+          hoverBg: 'linear-gradient(135deg, #43e97b 10%, #38f9d7 90%)'
+        };
+      default: 
+        return { 
+          bg: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+          lightBg: '#f9fffe',
+          accentColor: '#a8edea',
+          emoji: '📝',
+          hoverBg: 'linear-gradient(135deg, #a8edea 10%, #fed6e3 90%)'
+        };
     }
   };
 
-  // Better title handling
   const getColumnTitle = () => {
     if (screenSize === 'mobile') {
       switch (column.title) {
@@ -81,6 +116,8 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
     return column.title;
   };
 
+  const columnConfig = getColumnConfig(column.key);
+
   return (
     <div 
       id={`column-${column.key}`}
@@ -89,24 +126,49 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
       data-column-status={column.key}
       data-column-index={columnIndex}
       style={{
-        background: isDragOver ? '#dbeafe' : getColumnBackground(column.key),
-        borderRadius: '8px',
+        background: isDragOver 
+          ? `linear-gradient(135deg, ${columnConfig.accentColor}20, ${columnConfig.accentColor}10)`
+          : isHovered 
+          ? columnConfig.lightBg 
+          : 'white',
+        borderRadius: '16px',
         padding: getPadding(),
         display: 'flex',
         flexDirection: 'column',
         height: getColumnHeight(),
-        minHeight: screenSize === 'mobile' ? '180px' : '300px',
+        minHeight: screenSize === 'mobile' ? '200px' : '320px',
         minWidth: getMinWidth(),
-        border: isDragOver ? '2px dashed #36b37e' : '1px solid #e1e4e9',
-        transition: 'all 0.2s ease',
+        border: isDragOver 
+          ? `2px dashed ${columnConfig.accentColor}` 
+          : `1px solid ${isHovered ? columnConfig.accentColor + '40' : '#e2e8f0'}`,
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         overflow: 'hidden',
         width: '100%',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        boxShadow: isHovered 
+          ? `0 8px 25px ${columnConfig.accentColor}20, 0 0 0 1px ${columnConfig.accentColor}30`
+          : '0 2px 8px rgba(0,0,0,0.08)',
+        transform: isHovered ? 'translateY(-2px)' : 'none'
       }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Animated header background */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '60px',
+        background: columnConfig.bg,
+        borderRadius: '16px 16px 0 0',
+        opacity: 0.1,
+        transition: 'opacity 0.3s ease'
+      }} />
+
       {/* Column Header */}
       <div 
         id={`column-header-${column.key}`}
@@ -116,55 +178,67 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginTop: 0,
-          marginRight: 0,
-          marginBottom: screenSize === 'mobile' ? '8px' : '12px',
-          marginLeft: 0,
+          marginBottom: screenSize === 'mobile' ? '12px' : '16px',
           flexShrink: 0,
-          minHeight: '24px'
+          minHeight: '40px',
+          position: 'relative',
+          zIndex: 1
         }}
       >
-        <Title 
-          id={`column-title-${column.key}`}
-          className="jira-column-title"
-          data-testid={`column-title-${column.key}`}
-          level={5}
-          style={{
-            fontWeight: '600',
-            color: '#172b4d',
-            fontSize: screenSize === 'mobile' ? '12px' : screenSize === 'tablet' ? '13px' : '14px',
-            marginTop: 0,
-            marginRight: 0,
-            marginBottom: 0,
-            marginLeft: 0,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            flex: 1,
-            lineHeight: '1.2'
-          }}
-        >
-          {getColumnTitle()}
-        </Title>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{
+            background: columnConfig.bg,
+            borderRadius: '10px',
+            padding: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: '32px',
+            height: '32px'
+          }}>
+            <span style={{ fontSize: '16px' }}>{columnConfig.emoji}</span>
+          </div>
+          <Title 
+            level={5}
+            style={{
+              fontWeight: '700',
+              background: columnConfig.bg,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontSize: screenSize === 'mobile' ? '13px' : screenSize === 'tablet' ? '14px' : '16px',
+              margin: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              flex: 1,
+              lineHeight: '1.2'
+            }}
+          >
+            {getColumnTitle()}
+          </Title>
+        </div>
+        
         <Badge 
-          id={`column-count-${column.key}`}
-          className="jira-column-count"
-          data-testid={`column-count-${column.key}`}
-          data-task-count={tasks.length}
           count={tasks.length}
           style={{
-            backgroundColor: '#ddd',
-            color: '#666',
-            marginTop: 0,
-            marginRight: 0,
-            marginBottom: 0,
-            marginLeft: '8px'
+            background: columnConfig.bg,
+            color: 'white',
+            fontWeight: '600',
+            fontSize: '11px',
+            minWidth: '24px',
+            height: '24px',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
           }}
           size={screenSize === 'mobile' ? 'small' : 'default'}
         />
       </div>
 
-      {/* Tasks Container - Scrollable */}
+      {/* Tasks Container */}
       <div 
         id={`column-tasks-${column.key}`}
         className="jira-column-content scrollable"
@@ -174,7 +248,7 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           overflowY: 'auto',
           overflowX: 'hidden',
           minHeight: 0,
-          paddingRight: '2px'
+          paddingRight: '4px'
         }}
       >
         {tasks.map((task, taskIndex) => (
@@ -189,54 +263,89 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           />
         ))}
         
-        {/* Drop Zone Indicator */}
+        {/* Enhanced Drop Zone */}
         {isDragOver && (
           <div 
-            id={`drop-zone-${column.key}`}
-            className="jira-drop-zone"
-            data-testid={`drop-zone-${column.key}`}
             style={{
-              border: '2px dashed #36b37e',
-              borderRadius: '6px',
-              padding: screenSize === 'mobile' ? '8px' : '12px',
+              border: `3px dashed ${columnConfig.accentColor}`,
+              borderRadius: '12px',
+              padding: screenSize === 'mobile' ? '16px' : '24px',
               textAlign: 'center',
-              color: '#36b37e',
-              backgroundColor: '#e3fcef',
-              fontSize: screenSize === 'mobile' ? '11px' : '12px',
-              marginTop: 0,
-              marginRight: 0,
-              marginBottom: '8px',
-              marginLeft: 0
+              background: `linear-gradient(135deg, ${columnConfig.accentColor}10, ${columnConfig.accentColor}05)`,
+              marginBottom: '12px',
+              animation: 'pulse 2s infinite'
             }}
           >
-            <Text style={{ color: '#36b37e', fontSize: screenSize === 'mobile' ? '11px' : '12px' }}>
+            <div style={{
+              background: columnConfig.bg,
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 8px'
+            }}>
+              <PlusOutlined style={{ color: 'white', fontSize: '18px' }} />
+            </div>
+            <Text style={{ 
+              color: columnConfig.accentColor, 
+              fontSize: screenSize === 'mobile' ? '12px' : '14px',
+              fontWeight: '600'
+            }}>
               Drop task here
             </Text>
           </div>
         )}
         
-        {/* Empty State */}
+        {/* Enhanced Empty State */}
         {tasks.length === 0 && !isDragOver && (
           <div 
-            id={`empty-state-${column.key}`}
-            className="jira-empty-state"
-            data-testid={`empty-state-${column.key}`}
             style={{
               textAlign: 'center',
-              padding: screenSize === 'mobile' ? '12px 8px' : '20px 8px'
+              padding: screenSize === 'mobile' ? '20px 12px' : '32px 16px',
+              borderRadius: '12px',
+              background: `linear-gradient(135deg, ${columnConfig.accentColor}08, ${columnConfig.accentColor}04)`,
+              border: `1px dashed ${columnConfig.accentColor}30`
             }}
           >
-            <Empty 
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={
-                <Text type="secondary" style={{ fontSize: screenSize === 'mobile' ? '10px' : '11px' }}>
-                  No tasks
-                </Text>
-              }
-            />
+            <div style={{
+              background: columnConfig.bg,
+              borderRadius: '50%',
+              width: '48px',
+              height: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 12px',
+              opacity: 0.7
+            }}>
+              <span style={{ fontSize: '20px' }}>{columnConfig.emoji}</span>
+            </div>
+            <Text type="secondary" style={{ 
+              fontSize: screenSize === 'mobile' ? '11px' : '13px',
+              color: columnConfig.accentColor + '80'
+            }}>
+              No tasks yet
+            </Text>
+            <br />
+            <Text type="secondary" style={{ 
+              fontSize: screenSize === 'mobile' ? '10px' : '12px',
+              color: columnConfig.accentColor + '60'
+            }}>
+              Drag tasks here
+            </Text>
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.02); opacity: 0.8; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 };

@@ -60,11 +60,11 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
     onClose();
   };
 
-  // Better responsive width
+  // Better responsive width - more compact with height control
   const getModalWidth = () => {
-    if (screenSize === 'mobile') return '95%';
-    if (screenSize === 'tablet') return '85%';
-    return 650;
+    if (screenSize === 'mobile') return '90%';
+    if (screenSize === 'tablet') return '70%';
+    return 460; // Even smaller for desktop
   };
 
   return (
@@ -77,6 +77,12 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
       open={visible}
       onCancel={handleCancel}
       width={getModalWidth()}
+      style={{ maxHeight: '85vh' }} // Limit modal height
+      styles={{ 
+        maxHeight: '60vh', 
+        overflowY: 'auto',
+        padding: screenSize === 'mobile' ? '16px' : '20px'
+      }}
       centered
       destroyOnHidden
       maskClosable={false}
@@ -84,7 +90,7 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
         <Button 
           key="cancel" 
           onClick={handleCancel}
-          size={screenSize === 'mobile' ? 'large' : 'middle'}
+          size="middle" // Consistent size for all screens
           style={{ minWidth: screenSize === 'mobile' ? '80px' : '60px' }}
         >
           Cancel
@@ -123,7 +129,7 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
           <Input 
             placeholder="Enter a descriptive task title" 
             maxLength={100}
-            showCount={screenSize !== 'mobile'}
+            showCount={false} // Hide count to save space
           />
         </Form.Item>
 
@@ -136,13 +142,13 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
         >
           <TextArea
             placeholder="Enter task description (optional)"
-            rows={screenSize === 'mobile' ? 2 : 3}
+            rows={2} // Smaller for all screens
             maxLength={500}
-            showCount={screenSize !== 'mobile'}
+            showCount={false} // Hide count to save space
           />
         </Form.Item>
 
-        <Row gutter={[16, 16]}>
+        <Row gutter={[12, 8]}> {/* Smaller gutter */}
           <Col xs={24} sm={12}>
             <Form.Item
               name="status"
@@ -175,7 +181,7 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
           </Col>
         </Row>
 
-        <Row gutter={[16, 16]}>
+        <Row gutter={[12, 8]}> {/* Smaller gutter */}
           <Col xs={24} sm={12}>
             <Form.Item
               name="type"
