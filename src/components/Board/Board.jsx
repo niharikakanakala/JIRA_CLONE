@@ -22,15 +22,16 @@ const Board = ({ tasks, onEdit, onDelete, onMove, screenSize }) => {
   return (
     <div 
       id="kanban-board"
-      className="jira-board-container"
+      className="jira-board-grid"
       data-testid="kanban-board"
       style={{ 
-        height: 'calc(100vh - 80px)',
-        padding: screenSize === 'mobile' ? '4px' : '8px',
         display: 'grid',
+        gap: screenSize === 'mobile' ? '8px' : '12px',
+        height: 'calc(100vh - 120px)',
+        padding: screenSize === 'mobile' ? '8px' : '12px',
         gridTemplateColumns: getGridColumns(),
         gridTemplateRows: getGridRows(),
-        gap: screenSize === 'mobile' ? '4px' : '8px',
+        background: '#f5f5f5',
         overflow: 'hidden',
         width: '100%',
         boxSizing: 'border-box'

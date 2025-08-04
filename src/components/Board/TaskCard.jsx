@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Edit, Trash2, User } from 'lucide-react';
-import { TYPE_ICONS, PRIORITY_COLORS } from '../../utils/constants';
+import { Button, Tag, Avatar, Typography, Space } from 'antd';
+import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
+import { TYPE_ICONS } from '../../utils/constants';
+
+const { Text, Paragraph } = Typography;
 
 const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -35,14 +38,14 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
 
   // Responsive sizing
   const getCardPadding = () => {
-    if (screenSize === 'mobile') return '6px';
-    if (screenSize === 'tablet') return '8px';
-    return '10px';
+    if (screenSize === 'mobile') return '8px';
+    if (screenSize === 'tablet') return '12px';
+    return '12px';
   };
 
   const getCardMargin = () => {
     if (screenSize === 'mobile') return '4px';
-    return '6px';
+    return '8px';
   };
 
   const getTitleFontSize = () => {
@@ -63,6 +66,25 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
     return 16;
   };
 
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'high': return 'red';
+      case 'medium': return 'orange';
+      case 'low': return 'green';
+      default: return 'default';
+    }
+  };
+
+  const getTypeColor = (type) => {
+    switch (type) {
+      case 'story': return '#36b37e';
+      case 'bug': return '#ff5630';
+      case 'task': return '#0052cc';
+      case 'feature': return '#6554c0';
+      default: return '#0052cc';
+    }
+  };
+
   return (
     <div 
       id={`task-card-${task.id}`}
@@ -76,17 +98,18 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
       data-column-status={columnStatus}
       style={{
         backgroundColor: 'white',
-        border: '1px solid #e5e7eb',
-        borderRadius: '6px',
-        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        border: '1px solid #e1e4e9',
+        borderTop: `2px solid ${getTypeColor(task.type)}`,
+        borderLeft: `3px solid ${task.priority === 'high' ? '#c62828' : task.priority === 'medium' ? '#ef6c00' : '#2e7d32'}`,
+        borderRadius: '8px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
         padding: getCardPadding(),
         marginBottom: getCardMargin(),
         cursor: 'grab',
         position: 'relative',
         transition: 'all 0.2s ease',
         opacity: isDragging ? 0.5 : 1,
-        transform: isDragging ? 'rotate(1deg) scale(1.02)' : 'none',
-        fontSize: getTitleFontSize()
+        transform: isDragging ? 'rotate(2deg) scale(1.05)' : 'none'
       }}
       draggable
       onDragStart={handleDragStart}
@@ -102,59 +125,59 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
           data-testid={`task-actions-${task.id}`}
           style={{
             position: 'absolute',
-            top: '2px',
-            right: '2px',
-            display: 'flex',
-            gap: screenSize === 'mobile' ? '2px' : '3px',
-            zIndex: 20,
+            top: '8px',
+            right: '8px',
+            zIndex: 10,
             backgroundColor: 'white',
             borderRadius: '4px',
-            boxShadow: '0 1px 6px rgba(0,0,0,0.1)',
-            padding: screenSize === 'mobile' ? '2px' : '3px'
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            padding: '2px'
           }}
         >
-          <button
-            id={`edit-task-btn-${task.id}`}
-            className="jira-edit-btn"
-            data-testid={`edit-task-btn-${task.id}`}
-            data-action="edit"
-            data-task-id={task.id}
-            onClick={handleEditClick}
-            title="Edit task"
-            style={{
-              padding: screenSize === 'mobile' ? '2px' : '3px',
-              backgroundColor: '#dbeafe',
-              borderRadius: '3px',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Edit size={screenSize === 'mobile' ? 10 : 11} style={{ color: '#2563eb' }} />
-          </button>
-          <button
-            id={`delete-task-btn-${task.id}`}
-            className="jira-delete-btn"
-            data-testid={`delete-task-btn-${task.id}`}
-            data-action="delete"
-            data-task-id={task.id}
-            onClick={handleDeleteClick}
-            title="Delete task"
-            style={{
-              padding: screenSize === 'mobile' ? '2px' : '3px',
-              backgroundColor: '#fee2e2',
-              borderRadius: '3px',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Trash2 size={screenSize === 'mobile' ? 10 : 11} style={{ color: '#dc2626' }} />
-          </button>
+          <Space size={2}>
+            <Button
+              id={`edit-task-btn-${task.id}`}
+              className="jira-edit-btn"
+              data-testid={`edit-task-btn-${task.id}`}
+              data-action="edit"
+              data-task-id={task.id}
+              type="text"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={handleEditClick}
+              title="Edit task"
+              style={{
+                width: '20px',
+                height: '20px',
+                backgroundColor: '#e6f7ff',
+                color: '#1890ff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            />
+            <Button
+              id={`delete-task-btn-${task.id}`}
+              className="jira-delete-btn"
+              data-testid={`delete-task-btn-${task.id}`}
+              data-action="delete"
+              data-task-id={task.id}
+              type="text"
+              size="small"
+              icon={<DeleteOutlined />}
+              onClick={handleDeleteClick}
+              title="Delete task"
+              style={{
+                width: '20px',
+                height: '20px',
+                backgroundColor: '#fff1f0',
+                color: '#ff4d4f',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            />
+          </Space>
         </div>
       )}
       
@@ -174,43 +197,48 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
           size={getIconSize()} 
           style={{ color: '#6b7280', flexShrink: 0 }} 
         />
-        <span 
-          id={`task-title-${task.id}`}
-          className="jira-task-title"
-          data-testid={`task-title-${task.id}`}
-          style={{
-            fontWeight: '500',
-            flex: 1,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            fontSize: getTitleFontSize(),
-            color: '#374151',
-            lineHeight: 1.2
-          }}
-        >
-          {task.title}
-        </span>
+        <Tag color={getPriorityColor(task.priority)} size="small">
+          {screenSize === 'mobile' ? task.priority.charAt(0).toUpperCase() : task.priority.toUpperCase()}
+        </Tag>
       </div>
       
+      {/* Task Title */}
+      <Text 
+        id={`task-title-${task.id}`}
+        className="jira-task-title"
+        data-testid={`task-title-${task.id}`}
+        strong
+        style={{
+          display: 'block',
+          fontSize: getTitleFontSize(),
+          color: '#172b4d',
+          lineHeight: 1.3,
+          marginBottom: screenSize === 'mobile' ? '4px' : '4px',
+          wordWrap: 'break-word'
+        }}
+      >
+        {task.title}
+      </Text>
+      
       {/* Task Description - Compact layout */}
-      <p 
+      <Paragraph 
         id={`task-description-${task.id}`}
         className="jira-task-description"
         data-testid={`task-description-${task.id}`}
+        ellipsis={{ 
+          rows: screenSize === 'mobile' ? 1 : 2, 
+          expandable: false 
+        }}
         style={{
-          color: '#6b7280',
+          color: '#6b778c',
           marginBottom: screenSize === 'mobile' ? '6px' : '8px',
           fontSize: getDescriptionFontSize(),
-          lineHeight: 1.3,
-          display: '-webkit-box',
-          WebkitLineClamp: screenSize === 'mobile' ? 1 : 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden'
+          lineHeight: 1.4,
+          margin: 0
         }}
       >
         {task.description}
-      </p>
+      </Paragraph>
       
       {/* Task Footer - Compact layout */}
       <div 
@@ -220,46 +248,27 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          marginTop: '8px'
         }}
       >
-        <span 
-          id={`task-priority-${task.id}`}
-          className={`jira-priority-badge jira-priority-${task.priority}`}
-          data-testid={`task-priority-${task.id}`}
-          data-priority={task.priority}
-          style={{
-            padding: screenSize === 'mobile' ? '2px 4px' : '3px 6px',
-            borderRadius: '3px',
-            fontSize: screenSize === 'mobile' ? '8px' : '9px',
-            fontWeight: '500',
-            textTransform: 'uppercase',
-            color: task.priority === 'high' ? '#dc2626' : 
-                   task.priority === 'medium' ? '#d97706' : '#16a34a',
-            backgroundColor: task.priority === 'high' ? '#fee2e2' : 
-                            task.priority === 'medium' ? '#fef3c7' : '#dcfce7'
-          }}
-        >
-          {screenSize === 'mobile' ? task.priority.charAt(0).toUpperCase() : task.priority.toUpperCase()}
-        </span>
-        <div 
+        <div></div>
+        <Avatar 
           id={`task-assignee-${task.id}`}
           className="jira-assignee-avatar"
           data-testid={`task-assignee-${task.id}`}
           data-assignee={task.assignee}
-          title={task.assignee}
+          size={screenSize === 'mobile' ? 16 : 20}
+          icon={<UserOutlined />}
           style={{
-            width: screenSize === 'mobile' ? '16px' : '20px',
-            height: screenSize === 'mobile' ? '16px' : '20px',
-            backgroundColor: '#dbeafe',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
+            backgroundColor: '#e6f7ff',
+            color: '#1890ff',
+            fontSize: screenSize === 'mobile' ? '8px' : '10px'
           }}
+          title={task.assignee || 'Unassigned'}
         >
-          <User size={screenSize === 'mobile' ? 8 : 10} style={{ color: '#2563eb' }} />
-        </div>
+          {task.assignee ? task.assignee.charAt(0).toUpperCase() : null}
+        </Avatar>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Layout } from 'antd';
 import Board from '../Board/Board';
 import BacklogView from '../Backlog/BacklogView';
 import ReportsView from '../Reports/ReportsView';
@@ -8,6 +9,8 @@ import TaskModal from '../Modal/TaskModal';
 import Notification from '../Notifications/Notification';
 import { initialTasks, backlogTasks } from '../../data/mockData';
 import { generateId } from '../../utils/helpers';
+
+const { Content, Sider } = Layout;
 
 const MainLayout = () => {
   const [tasks, setTasks] = useState(initialTasks);
@@ -106,20 +109,17 @@ const MainLayout = () => {
     console.log('Saving task:', taskData);
     
     if (editingTask) {
-      // Handle editing existing task
       const oldStatus = editingTask.status;
       const newStatus = taskData.status;
       
       console.log('Status change:', oldStatus, '->', newStatus);
       
-      // Remove from old location
       if (oldStatus === 'backlog') {
         setBacklogTasksList(prev => prev.filter(task => task.id !== editingTask.id));
       } else {
         setTasks(prev => prev.filter(task => task.id !== editingTask.id));
       }
       
-      // Add to new location
       if (newStatus === 'backlog') {
         setBacklogTasksList(prev => [...prev, { ...taskData, status: 'backlog' }]);
         addNotification(`Task moved to backlog!`, 'info');
@@ -132,7 +132,6 @@ const MainLayout = () => {
         }
       }
     } else {
-      // Handle creating new task
       if (taskData.status === 'backlog') {
         setBacklogTasksList(prev => [...prev, { ...taskData, status: 'backlog' }]);
         addNotification('New backlog item created!', 'success');
@@ -149,7 +148,6 @@ const MainLayout = () => {
   const handleMoveTask = (taskId, newStatus, fromStatus) => {
     console.log('Moving task:', taskId, 'from', fromStatus, 'to', newStatus);
     
-    // Find the task
     const taskToMove = tasks.find(task => task.id === taskId);
     
     if (!taskToMove) {
@@ -157,11 +155,8 @@ const MainLayout = () => {
       return;
     }
     
-    // Handle move to backlog
     if (newStatus === 'backlog') {
-      // Remove from board tasks
       setTasks(prev => prev.filter(task => task.id !== taskId));
-      // Add to backlog
       setBacklogTasksList(prev => [...prev, { 
         ...taskToMove, 
         status: 'backlog', 
@@ -169,7 +164,6 @@ const MainLayout = () => {
       }]);
       addNotification(`Task moved to backlog!`, 'info');
     } else {
-      // Normal board movement
       setTasks(prevTasks => 
         prevTasks.map(task => 
           task.id === taskId 
@@ -217,11 +211,25 @@ const MainLayout = () => {
   };
 
   return (
-    <div id="jira-clone-app" className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+    <Layout 
+      id="jira-clone-app"
+      style={{ 
+        height: '100vh',
+        overflow: 'hidden'
+      }}
+    >
       {/* Toast Notifications */}
       <div 
         id="toast-notifications-container"
-        className="fixed top-4 left-4 z-40 space-y-2"
+        style={{
+          position: 'fixed',
+          top: '16px',
+          left: '16px',
+          zIndex: 1000,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px'
+        }}
       >
         {notifications.slice(0, 3).map(notification => (
           <Notification
@@ -243,20 +251,39 @@ const MainLayout = () => {
         onClearAllNotifications={clearAllNotifications}
       />
 
-      <div className="flex-1 flex overflow-hidden">
-        <Sidebar
-          currentView={currentView}
-          screenSize={screenSize}
-          onViewChange={setCurrentView}
-        />
-
-        <main 
-          id="app-main-content"
-          className="flex-1 overflow-hidden"
+      <Layout style={{ height: 'calc(100vh - 64px)' }}>
+        {/* Use Ant Design Sider for proper layout */}
+        <Sider
+          width={screenSize === 'mobile' ? 60 : 200}
+          style={{
+            background: 'white',
+            borderRight: '1px solid #f0f0f0',
+            height: '100%',
+            overflow: 'hidden'
+          }}
         >
-          {renderContent()}
-        </main>
-      </div>
+          <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Sidebar
+              currentView={currentView}
+              screenSize={screenSize}
+              onViewChange={setCurrentView}
+            />
+          </div>
+        </Sider>
+
+        <Layout style={{ background: '#f5f5f5' }}>
+          <Content 
+            id="app-main-content"
+            style={{
+              background: '#f5f5f5',
+              overflow: 'hidden',
+              height: '100%'
+            }}
+          >
+            {renderContent()}
+          </Content>
+        </Layout>
+      </Layout>
 
       <TaskModal
         visible={modalVisible}
@@ -268,7 +295,7 @@ const MainLayout = () => {
         onSave={handleSaveTask}
         screenSize={screenSize}
       />
-    </div>
+    </Layout>
   );
 };
 

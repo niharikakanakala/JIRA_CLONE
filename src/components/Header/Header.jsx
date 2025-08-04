@@ -1,5 +1,6 @@
 import React from 'react';
-import { Plus } from 'lucide-react';
+import { Button } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import NotificationsDropdown from '../Notifications/NotificationsDropdown';
 
 const Header = ({ 
@@ -13,10 +14,10 @@ const Header = ({
   onClearAllNotifications
 }) => {
   const headerClasses = screenSize === 'mobile' 
-    ? 'px-2 py-2' 
+    ? 'jira-header' 
     : screenSize === 'tablet'
-    ? 'px-4 py-3'
-    : 'px-6 py-4';
+    ? 'jira-header'
+    : 'jira-header';
 
   const titleClasses = screenSize === 'mobile' 
     ? 'text-lg font-bold' 
@@ -27,18 +28,36 @@ const Header = ({
   return (
     <header 
       id="app-header"
-      className={`bg-white border-b border-gray-200 flex items-center justify-between ${headerClasses} flex-shrink-0`}
+      className={headerClasses}
+      style={{
+        background: 'white',
+        borderBottom: '1px solid #f0f0f0',
+        padding: screenSize === 'mobile' ? '0 8px' : '0 16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: '64px',
+        flexShrink: 0
+      }}
     >
-      <div className="flex items-center gap-4">
-        <h1 id="app-title" className={`text-blue-600 ${titleClasses}`}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <h1 
+          id="app-title" 
+          style={{ 
+            color: '#1890ff', 
+            fontSize: screenSize === 'mobile' ? '18px' : '24px',
+            fontWeight: 'bold',
+            margin: 0
+          }}
+        >
           JIRA Clone
         </h1>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#666' }}>
           <span>/</span>
-          <span className="capitalize font-medium">{currentView}</span>
+          <span style={{ textTransform: 'capitalize', fontWeight: 500 }}>{currentView}</span>
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <NotificationsDropdown
           notifications={notifications}
           onClose={onRemoveNotification}
@@ -46,16 +65,15 @@ const Header = ({
           isOpen={notificationsOpen}
           onToggle={onToggleNotifications}
         />
-        <button
+        <Button
           id="create-task-btn"
+          type="primary"
+          icon={<PlusOutlined />}
           onClick={onCreateTask}
-          className={`bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2 transition-colors ${
-            screenSize === 'mobile' ? 'text-sm px-3 py-1' : ''
-          }`}
+          size={screenSize === 'mobile' ? 'small' : 'middle'}
         >
-          <Plus size={screenSize === 'mobile' ? 14 : 16} />
           {screenSize !== 'mobile' && 'Create'}
-        </button>
+        </Button>
       </div>
     </header>
   );

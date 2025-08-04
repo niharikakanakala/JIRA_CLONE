@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { Alert, Button } from 'antd';
+import { CloseOutlined } from '@ant-design/icons';
 
 const Notification = ({ notification, onClose }) => {
   useEffect(() => {
@@ -9,27 +10,37 @@ const Notification = ({ notification, onClose }) => {
     return () => clearTimeout(timer);
   }, [notification.id, onClose]);
 
-  const getBgColor = () => {
+  const getNotificationType = () => {
     switch (notification.type) {
-      case 'success': return 'bg-green-500';
-      case 'error': return 'bg-red-500';
-      case 'warning': return 'bg-yellow-500';
-      default: return 'bg-blue-500';
+      case 'success': return 'success';
+      case 'error': return 'error';
+      case 'warning': return 'warning';
+      default: return 'info';
     }
   };
 
   return (
     <div 
       id={`notification-${notification.id}`}
-      className={`${getBgColor()} text-white p-3 rounded-lg shadow-lg flex justify-between items-center mb-2 animate-slide-in max-w-sm`}
+      className="animate-slide-in"
+      style={{
+        maxWidth: '320px',
+        marginBottom: '8px'
+      }}
     >
-      <span className="text-sm flex-1 mr-2">{notification.message}</span>
-      <button
-        onClick={() => onClose(notification.id)}
-        className="ml-2 text-white hover:text-gray-200 flex-shrink-0"
-      >
-        <X size={16} />
-      </button>
+      <Alert
+        message={notification.message}
+        type={getNotificationType()}
+        showIcon
+        closable
+        onClose={() => onClose(notification.id)}
+        closeIcon={<CloseOutlined style={{ fontSize: '12px' }} />}
+        style={{
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          fontSize: '14px'
+        }}
+      />
     </div>
   );
 };

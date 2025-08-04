@@ -1,62 +1,100 @@
 import React from 'react';
-import { Edit, Trash2, AlertCircle } from 'lucide-react';
+import { Card, Button, Tag, Empty, Typography, Space } from 'antd';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { AlertCircle } from 'lucide-react';
 import { TYPE_ICONS, PRIORITY_COLORS } from '../../utils/constants';
 import { formatDate, sortTasksByDate } from '../../utils/helpers';
+
+const { Title, Text, Paragraph } = Typography;
 
 const BacklogView = ({ tasks, onEdit, onDelete, screenSize }) => {
   const sortedTasks = sortTasksByDate(tasks, 'updated', 'desc');
 
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'high': return 'red';
+      case 'medium': return 'orange';
+      case 'low': return 'green';
+      default: return 'default';
+    }
+  };
+
   return (
     <div 
       id="backlog-view" 
-      className="w-full h-full overflow-y-auto overflow-x-hidden scrollable"
+      className="backlog-container scrollable"
       style={{ 
-        height: 'calc(100vh - 80px)',
-        paddingBottom: '150px',
-        paddingTop: '10px'
+        height: 'calc(100vh - 64px)',
+        padding: '20px',
+        overflow: 'auto'
       }}
     >
-      <div className="p-4">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Product Backlog</h2>
-          <p className="text-gray-600">Manage your product backlog and plan future sprints</p>
-          <div className="mt-2 text-sm text-gray-500">
+      <div style={{ marginBottom: '24px' }}>
+        <Title level={2} style={{ marginBottom: '8px', color: '#262626' }}>
+          Product Backlog
+        </Title>
+        <Text type="secondary" style={{ fontSize: '16px' }}>
+          Manage your product backlog and plan future sprints
+        </Text>
+        <div style={{ marginTop: '8px' }}>
+          <Text type="secondary" style={{ fontSize: '14px' }}>
             Total items: {tasks.length} | Last updated: {formatDate(new Date().toISOString())}
-          </div>
+          </Text>
         </div>
-        
-        <div className="space-y-3">
-          {sortedTasks.map(task => (
-            <div 
+      </div>
+      
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {sortedTasks.map(task => {
+          const IconComponent = TYPE_ICONS[task.type];
+          return (
+            <Card 
               key={task.id}
               id={`backlog-item-${task.id}`}
-              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              className="backlog-item"
+              style={{ 
+                background: 'white',
+                border: '1px solid #f0f0f0',
+                borderRadius: '8px'
+              }}
+              bodyStyle={{ padding: '16px' }}
+              hoverable
             >
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    {React.createElement(TYPE_ICONS[task.type], { size: 16, className: "text-gray-600" })}
-                    <span className="font-medium">{task.title}</span>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${PRIORITY_COLORS[task.priority]}`}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <IconComponent size={16} style={{ color: '#8c8c8c' }} />
+                    <Text strong style={{ fontSize: '16px' }}>{task.title}</Text>
+                    <Tag color={getPriorityColor(task.priority)} size="small">
                       {task.priority.toUpperCase()}
-                    </span>
+                    </Tag>
                   </div>
-                  <p className="text-gray-600 text-sm mb-2">{task.description}</p>
-                  <div className="text-xs text-gray-500">
-                    Assignee: {task.assignee} | Reporter: {task.reporter} | Updated: {formatDate(task.updated)}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    id={`edit-backlog-item-${task.id}`}
-                    onClick={() => onEdit(task)}
-                    className="p-1 bg-blue-100 rounded hover:bg-blue-200"
-                    title="Edit item"
+                  <Paragraph 
+                    type="secondary" 
+                    style={{ fontSize: '14px', marginBottom: '8px' }}
+                    ellipsis={{ rows: 2, expandable: false }}
                   >
-                    <Edit size={14} className="text-blue-600" />
-                  </button>
-                  <button
+                    {task.description}
+                  </Paragraph>
+                  <Text type="secondary" style={{ fontSize: '12px' }}>
+                    Assignee: {task.assignee || 'Unassigned'} | Reporter: {task.reporter || 'Unknown'} | Updated: {formatDate(task.updated)}
+                  </Text>
+                </div>
+                <Space size="small">
+                  <Button
+                    id={`edit-backlog-item-${task.id}`}
+                    type="text"
+                    icon={<EditOutlined />}
+                    onClick={() => onEdit(task)}
+                    title="Edit item"
+                    style={{ 
+                      color: '#1890ff',
+                      backgroundColor: '#e6f7ff'
+                    }}
+                  />
+                  <Button
                     id={`delete-backlog-item-${task.id}`}
+                    type="text"
+                    icon={<DeleteOutlined />}
                     onClick={(e) => {
                       e.stopPropagation();
                       e.preventDefault();
@@ -64,25 +102,35 @@ const BacklogView = ({ tasks, onEdit, onDelete, screenSize }) => {
                       console.log('Deleting backlog item directly:', task.id);
                       onDelete(task.id);
                     }}
-                    className="p-1 bg-red-100 rounded hover:bg-red-200"
                     title="Delete item"
-                  >
-                    <Trash2 size={14} className="text-red-600" />
-                  </button>
-                </div>
+                    style={{ 
+                      color: '#ff4d4f',
+                      backgroundColor: '#fff1f0'
+                    }}
+                  />
+                </Space>
               </div>
-            </div>
-          ))}
-          {tasks.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              <AlertCircle size={48} className="mx-auto mb-4 text-gray-300" />
-              <p>No backlog items found. Create your first item to get started!</p>
-            </div>
-          )}
-        </div>
+            </Card>
+          );
+        })}
         
-        <div className="h-20"></div>
+        {tasks.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '48px 0' }}>
+            <Empty 
+              image={<AlertCircle size={48} style={{ color: '#d9d9d9' }} />}
+              description={
+                <div>
+                  <Text type="secondary">No backlog items found.</Text>
+                  <br />
+                  <Text type="secondary">Create your first item to get started!</Text>
+                </div>
+              }
+            />
+          </div>
+        )}
       </div>
+      
+      <div style={{ height: '80px' }}></div>
     </div>
   );
 };

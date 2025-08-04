@@ -1,83 +1,148 @@
 import React from 'react';
-import { Bell, X } from 'lucide-react';
+import { Button, Badge, Dropdown, Empty, Typography, Space, Tag } from 'antd';
+import { BellOutlined, CloseOutlined } from '@ant-design/icons';
+
+const { Text, Title } = Typography;
 
 const NotificationsDropdown = ({ notifications, onClose, onClearAll, isOpen, onToggle }) => {
+  const getTagColor = (type) => {
+    switch (type) {
+      case 'success': return 'success';
+      case 'error': return 'error';
+      case 'warning': return 'warning';
+      default: return 'processing';
+    }
+  };
+
+  const dropdownContent = (
+    <div 
+      id="notifications-dropdown"
+      style={{
+        width: '320px',
+        maxHeight: '400px',
+        backgroundColor: 'white',
+        border: '1px solid #f0f0f0',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+      }}
+    >
+      {/* Header */}
+      <div style={{
+        padding: '12px 16px',
+        borderBottom: '1px solid #f0f0f0',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <Title level={5} style={{ margin: 0, color: '#262626' }}>
+          Notifications
+        </Title>
+        {notifications.length > 0 && (
+          <Button
+            id="clear-all-notifications-btn"
+            type="text"
+            size="small"
+            onClick={onClearAll}
+            style={{
+              fontSize: '12px',
+              color: '#666',
+              padding: '2px 8px'
+            }}
+          >
+            Clear All
+          </Button>
+        )}
+      </div>
+      
+      {/* Content */}
+      <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
+        {notifications.length === 0 ? (
+          <div style={{ padding: '32px 16px', textAlign: 'center' }}>
+            <Empty 
+              image={<BellOutlined style={{ fontSize: '32px', color: '#d9d9d9' }} />}
+              description={
+                <Text type="secondary">No notifications</Text>
+              }
+            />
+          </div>
+        ) : (
+          notifications.map(notification => (
+            <div 
+              key={notification.id}
+              id={`notification-item-${notification.id}`}
+              style={{
+                padding: '12px 16px',
+                borderBottom: '1px solid #f5f5f5',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#fafafa'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ flex: 1, marginRight: '8px' }}>
+                  <div style={{ marginBottom: '4px' }}>
+                    <Tag 
+                      color={getTagColor(notification.type)} 
+                      size="small"
+                      style={{ fontSize: '10px' }}
+                    >
+                      {notification.type.toUpperCase()}
+                    </Tag>
+                  </div>
+                  <Text style={{ fontSize: '14px', color: '#262626', display: 'block', marginBottom: '4px' }}>
+                    {notification.message}
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: '12px' }}>
+                    {new Date(notification.timestamp).toLocaleTimeString()}
+                  </Text>
+                </div>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<CloseOutlined />}
+                  onClick={() => onClose(notification.id)}
+                  style={{
+                    color: '#8c8c8c',
+                    padding: '4px',
+                    minWidth: 'auto',
+                    width: '24px',
+                    height: '24px'
+                  }}
+                />
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="relative">
-      <button
+    <Dropdown
+      overlay={dropdownContent}
+      trigger={['click']}
+      open={isOpen}
+      onOpenChange={onToggle}
+      placement="bottomRight"
+    >
+      <Button
         id="notifications-btn"
-        onClick={onToggle}
-        className="p-2 hover:bg-gray-100 rounded-full relative transition-colors"
+        type="text"
+        shape="circle"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '40px',
+          height: '40px'
+        }}
         title={notifications.length > 0 ? `${notifications.length} notifications` : "No notifications"}
       >
-        <Bell size={20} className="text-gray-600" />
-        {notifications.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-            {notifications.length}
-          </span>
-        )}
-      </button>
-
-      {isOpen && (
-        <div 
-          id="notifications-dropdown"
-          className="absolute right-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-hidden"
-        >
-          <div className="p-3 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="font-semibold text-gray-800">Notifications</h3>
-            {notifications.length > 0 && (
-              <button
-                id="clear-all-notifications-btn"
-                onClick={onClearAll}
-                className="text-xs bg-gray-600 text-white px-2 py-1 rounded hover:bg-gray-700"
-              >
-                Clear All
-              </button>
-            )}
-          </div>
-          
-          <div className="max-h-64 overflow-y-auto scrollable">
-            {notifications.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                <Bell size={32} className="mx-auto mb-2 text-gray-300" />
-                <p>No notifications</p>
-              </div>
-            ) : (
-              notifications.map(notification => (
-                <div 
-                  key={notification.id}
-                  id={`notification-item-${notification.id}`}
-                  className="p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className={`inline-block px-2 py-1 rounded text-xs font-medium mb-1 ${
-                        notification.type === 'success' ? 'bg-green-100 text-green-700' :
-                        notification.type === 'error' ? 'bg-red-100 text-red-700' :
-                        notification.type === 'warning' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-blue-100 text-blue-700'
-                      }`}>
-                        {notification.type.toUpperCase()}
-                      </div>
-                      <p className="text-sm text-gray-800">{notification.message}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(notification.timestamp).toLocaleTimeString()}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => onClose(notification.id)}
-                      className="ml-2 text-gray-400 hover:text-gray-600"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+        <Badge count={notifications.length} size="small">
+          <BellOutlined style={{ fontSize: '20px', color: '#595959' }} />
+        </Badge>
+      </Button>
+    </Dropdown>
   );
 };
 

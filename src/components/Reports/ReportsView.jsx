@@ -1,7 +1,10 @@
 import React from 'react';
+import { Card, Row, Col, Progress, Typography, Empty } from 'antd';
 import { AlertCircle } from 'lucide-react';
 import { STATUS_COLUMNS, TYPE_ICONS, PRIORITY_COLORS } from '../../utils/constants';
 import { formatDate, sortTasksByDate, calculatePercentage } from '../../utils/helpers';
+
+const { Title, Text } = Typography;
 
 const ReportsView = ({ allTasks, screenSize }) => {
   const boardTasks = allTasks.filter(task => task.status !== 'backlog');
@@ -20,158 +23,206 @@ const ReportsView = ({ allTasks, screenSize }) => {
   const recentTasks = sortTasksByDate(allTasks, 'updated', 'desc').slice(0, 15);
   const totalTasks = allTasks.length;
 
+  const getProgressColor = (type) => {
+    switch (type) {
+      case 'high': return '#ff4d4f';
+      case 'medium': return '#faad14';
+      case 'low': return '#52c41a';
+      default: return '#1890ff';
+    }
+  };
+
   return (
     <div 
       id="reports-view" 
-      className="w-full h-full overflow-y-auto overflow-x-hidden scrollable"
+      className="reports-container scrollable"
       style={{ 
-        height: 'calc(100vh - 80px)',
-        paddingBottom: '150px',
-        paddingTop: '10px'
+        height: 'calc(100vh - 64px)',
+        padding: '20px',
+        overflow: 'auto'
       }}
     >
-      <div className="p-4 w-full">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Project Reports</h2>
-          <p className="text-gray-600">Track your project progress and metrics</p>
-          <div className="mt-2 text-sm text-gray-500">
+      <div style={{ marginBottom: '24px' }}>
+        <Title level={2} style={{ marginBottom: '8px', color: '#262626' }}>
+          Project Reports
+        </Title>
+        <Text type="secondary" style={{ fontSize: '16px' }}>
+          Track your project progress and metrics
+        </Text>
+        <div style={{ marginTop: '8px' }}>
+          <Text type="secondary" style={{ fontSize: '14px' }}>
             Total Tasks: {totalTasks} | Board Tasks: {boardTasks.length} | Backlog: {backlogTasks.length}
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          {/* Project Summary Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">{totalTasks}</div>
-              <div className="text-sm text-gray-600">Total Tasks</div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">{statusCounts.done || 0}</div>
-              <div className="text-sm text-gray-600">Completed</div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-yellow-600">{statusCounts.progress || 0}</div>
-              <div className="text-sm text-gray-600">In Progress</div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-gray-600">{backlogTasks.length}</div>
-              <div className="text-sm text-gray-600">Backlog Items</div>
-            </div>
-          </div>
-
-          {/* Status Distribution */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-4">Status Distribution</h3>
-            <div className="space-y-3">
-              {STATUS_COLUMNS.map(column => {
-                const count = statusCounts[column.key] || 0;
-                const percentage = calculatePercentage(count, boardTasks.length);
-                return (
-                  <div key={column.key} className="flex justify-between items-center">
-                    <span className="text-gray-700">{column.title}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${percentage}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-sm font-medium w-8 text-right">{count}</span>
-                      <span className="text-xs text-gray-500 w-10 text-right">({percentage}%)</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Priority Distribution */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-4">Priority Distribution</h3>
-            <div className="space-y-3">
-              {Object.entries(priorityCounts).map(([priority, count]) => {
-                const percentage = calculatePercentage(count, totalTasks);
-                const color = priority === 'high' ? 'bg-red-500' : 
-                            priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500';
-                return (
-                  <div key={priority} className="flex justify-between items-center">
-                    <span className="text-gray-700 capitalize">{priority} Priority</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={`${color} h-2 rounded-full transition-all duration-300`}
-                          style={{ width: `${percentage}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-sm font-medium w-8 text-right">{count}</span>
-                      <span className="text-xs text-gray-500 w-10 text-right">({percentage}%)</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Task Types Distribution */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-4">Task Types Distribution</h3>
-            <div className="space-y-3">
-              {Object.keys(TYPE_ICONS).map(type => {
-                const count = allTasks.filter(task => task.type === type).length;
-                const percentage = calculatePercentage(count, totalTasks);
-                return (
-                  <div key={type} className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      {React.createElement(TYPE_ICONS[type], { size: 16, className: "text-gray-600" })}
-                      <span className="text-gray-700 capitalize">{type}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-purple-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${percentage}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-sm font-medium w-8 text-right">{count}</span>
-                      <span className="text-xs text-gray-500 w-10 text-right">({percentage}%)</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-            <div className="space-y-2">
-              {recentTasks.map(task => (
-                <div key={task.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                  <div className="flex items-center gap-2 flex-1">
-                    {React.createElement(TYPE_ICONS[task.type], { size: 14, className: "text-gray-600" })}
-                    <span className="text-sm truncate flex-1">{task.title}</span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className={`px-2 py-1 rounded text-xs ${PRIORITY_COLORS[task.priority]}`}>
-                      {task.priority}
-                    </span>
-                    <span className="text-xs text-gray-500">{formatDate(task.updated)}</span>
-                  </div>
-                </div>
-              ))}
-              {recentTasks.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <AlertCircle size={32} className="mx-auto mb-2 text-gray-300" />
-                  <p>No recent activity found.</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="h-20"></div>
+          </Text>
         </div>
       </div>
+
+      {/* Project Summary Cards */}
+      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+        <Col xs={12} sm={6}>
+          <Card style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#1890ff', marginBottom: '8px' }}>
+              {totalTasks}
+            </div>
+            <Text type="secondary">Total Tasks</Text>
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#52c41a', marginBottom: '8px' }}>
+              {statusCounts.done || 0}
+            </div>
+            <Text type="secondary">Completed</Text>
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#faad14', marginBottom: '8px' }}>
+              {statusCounts.progress || 0}
+            </div>
+            <Text type="secondary">In Progress</Text>
+          </Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#8c8c8c', marginBottom: '8px' }}>
+              {backlogTasks.length}
+            </div>
+            <Text type="secondary">Backlog Items</Text>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Status Distribution */}
+      <Card title="Status Distribution" style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {STATUS_COLUMNS.map(column => {
+            const count = statusCounts[column.key] || 0;
+            const percentage = calculatePercentage(count, boardTasks.length);
+            return (
+              <div key={column.key}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <Text>{column.title}</Text>
+                  <Text>
+                    <strong>{count}</strong> ({percentage}%)
+                  </Text>
+                </div>
+                <Progress 
+                  percent={percentage} 
+                  showInfo={false}
+                  strokeColor="#1890ff"
+                />
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Priority Distribution */}
+      <Card title="Priority Distribution" style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {Object.entries(priorityCounts).map(([priority, count]) => {
+            const percentage = calculatePercentage(count, totalTasks);
+            return (
+              <div key={priority}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <Text style={{ textTransform: 'capitalize' }}>{priority} Priority</Text>
+                  <Text>
+                    <strong>{count}</strong> ({percentage}%)
+                  </Text>
+                </div>
+                <Progress 
+                  percent={percentage} 
+                  showInfo={false}
+                  strokeColor={getProgressColor(priority)}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Task Types Distribution */}
+      <Card title="Task Types Distribution" style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {Object.keys(TYPE_ICONS).map(type => {
+            const count = allTasks.filter(task => task.type === type).length;
+            const percentage = calculatePercentage(count, totalTasks);
+            const IconComponent = TYPE_ICONS[type];
+            return (
+              <div key={type}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <IconComponent size={16} />
+                    <Text style={{ textTransform: 'capitalize' }}>{type}</Text>
+                  </div>
+                  <Text>
+                    <strong>{count}</strong> ({percentage}%)
+                  </Text>
+                </div>
+                <Progress 
+                  percent={percentage} 
+                  showInfo={false}
+                  strokeColor="#722ed1"
+                />
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* Recent Activity */}
+      <Card title="Recent Activity" style={{ marginBottom: '100px' }}>
+        {recentTasks.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {recentTasks.map(task => {
+              const IconComponent = TYPE_ICONS[task.type];
+              const priorityColor = task.priority === 'high' ? '#ff4d4f' : 
+                                  task.priority === 'medium' ? '#faad14' : '#52c41a';
+              return (
+                <div 
+                  key={task.id} 
+                  style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    padding: '12px 0',
+                    borderBottom: '1px solid #f0f0f0'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                    <IconComponent size={16} style={{ color: '#8c8c8c' }} />
+                    <Text ellipsis style={{ flex: 1 }}>{task.title}</Text>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span 
+                      style={{
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        textTransform: 'uppercase',
+                        fontWeight: '500',
+                        color: priorityColor,
+                        backgroundColor: task.priority === 'high' ? '#fff1f0' : 
+                                       task.priority === 'medium' ? '#fffbe6' : '#f6ffed'
+                      }}
+                    >
+                      {task.priority}
+                    </span>
+                    <Text type="secondary" style={{ fontSize: '12px' }}>
+                      {formatDate(task.updated)}
+                    </Text>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <Empty 
+            image={<AlertCircle size={48} style={{ color: '#d9d9d9' }} />}
+            description="No recent activity found."
+          />
+        )}
+      </Card>
     </div>
   );
 };

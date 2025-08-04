@@ -1,56 +1,61 @@
 import React from 'react';
-import { CheckSquare, Book, Bug } from 'lucide-react';
+import { Menu } from 'antd';
+import { ProjectOutlined, UnorderedListOutlined, BarChartOutlined } from '@ant-design/icons';
 
 const Sidebar = ({ currentView, screenSize, onViewChange }) => {
-  const sidebarClasses = screenSize === 'mobile' 
-    ? 'w-16 p-1' 
-    : screenSize === 'tablet'
-    ? 'w-20 p-2'
-    : 'w-24 p-3';
+  const sidebarStyle = {
+    background: 'white',
+    borderRight: '1px solid #f0f0f0',
+    width: screenSize === 'mobile' ? '60px' : '200px',
+    padding: screenSize === 'mobile' ? '8px 0' : '16px 0',
+    flexShrink: 0,
+    // Add these properties to ensure full height
+    height: '100%',
+    minHeight: 'calc(100vh - 64px)', // Account for header height
+    display: 'flex',
+    flexDirection: 'column'
+  };
 
   const navigationItems = [
     {
-      id: 'board',
-      label: 'Board',
-      icon: CheckSquare,
-      view: 'board'
+      key: 'board',
+      icon: <ProjectOutlined />,
+      label: screenSize === 'mobile' ? '' : 'Board',
     },
     {
-      id: 'backlog',
-      label: 'Backlog',
-      icon: Book,
-      view: 'backlog'
+      key: 'backlog',
+      icon: <UnorderedListOutlined />,
+      label: screenSize === 'mobile' ? '' : 'Backlog',
     },
     {
-      id: 'reports',
-      label: 'Reports',
-      icon: Bug,
-      view: 'reports'
+      key: 'reports',
+      icon: <BarChartOutlined />,
+      label: screenSize === 'mobile' ? '' : 'Reports',
     }
   ];
+
+  const handleMenuClick = ({ key }) => {
+    onViewChange(key);
+  };
 
   return (
     <aside 
       id="app-sidebar"
-      className={`bg-white border-r border-gray-200 ${sidebarClasses} flex-shrink-0`}
+      className="jira-sidebar"
+      style={sidebarStyle}
     >
-      <nav className="space-y-2">
-        {navigationItems.map(item => (
-          <button
-            key={item.id}
-            id={`sidebar-${item.id}-btn`}
-            onClick={() => onViewChange(item.view)}
-            className={`w-full p-2 text-left hover:bg-gray-100 rounded flex flex-col items-center gap-1 transition-colors ${
-              currentView === item.view ? 'bg-blue-100 text-blue-600' : ''
-            }`}
-          >
-            <item.icon size={screenSize === 'mobile' ? 16 : 20} />
-            {screenSize !== 'mobile' && (
-              <span className="text-xs">{item.label}</span>
-            )}
-          </button>
-        ))}
-      </nav>
+      <Menu
+        mode="vertical"
+        selectedKeys={[currentView]}
+        onClick={handleMenuClick}
+        items={navigationItems}
+        style={{
+          border: 'none',
+          background: 'transparent',
+          flex: 1, // Take up available space
+          height: '100%'
+        }}
+      />
     </aside>
   );
 };
