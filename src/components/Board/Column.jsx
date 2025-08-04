@@ -36,6 +36,24 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
     }
   };
 
+  // Calculate responsive dimensions
+  const getColumnHeight = () => {
+    if (screenSize === 'mobile') return 'calc((100vh - 100px) / 2 - 8px)'; // Half height for 2x2 grid
+    return 'calc(100vh - 120px)'; // Full height for single row
+  };
+
+  const getPadding = () => {
+    if (screenSize === 'mobile') return '6px';
+    if (screenSize === 'tablet') return '8px';
+    return '12px';
+  };
+
+  const getFontSize = () => {
+    if (screenSize === 'mobile') return '12px';
+    if (screenSize === 'tablet') return '14px';
+    return '16px';
+  };
+
   return (
     <div 
       id={`column-${column.key}`}
@@ -44,21 +62,24 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
       data-column-status={column.key}
       data-column-index={columnIndex}
       style={{
-        borderRadius: '8px',
-        padding: '12px',
+        borderRadius: '6px',
+        padding: getPadding(),
         display: 'flex',
         flexDirection: 'column',
-        height: screenSize === 'mobile' ? 'auto' : 'calc(100vh - 120px)',
-        minHeight: screenSize === 'mobile' ? '200px' : '400px',
+        height: getColumnHeight(),
+        minHeight: screenSize === 'mobile' ? '150px' : '200px',
         border: isDragOver ? '2px solid #3b82f6' : '1px solid #e5e7eb',
         backgroundColor: isDragOver ? '#dbeafe' : undefined,
-        transition: 'all 0.2s ease'
+        transition: 'all 0.2s ease',
+        overflow: 'hidden',
+        width: '100%',
+        boxSizing: 'border-box'
       }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* Column Header - Consistent across all screens */}
+      {/* Column Header - Compact for mobile */}
       <div 
         id={`column-header-${column.key}`}
         className="jira-column-header"
@@ -67,7 +88,7 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '12px',
+          marginBottom: screenSize === 'mobile' ? '6px' : '8px',
           flexShrink: 0
         }}
       >
@@ -78,11 +99,15 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           style={{
             fontWeight: '600',
             color: '#374151',
-            fontSize: screenSize === 'mobile' ? '14px' : '16px',
-            margin: 0
+            fontSize: getFontSize(),
+            margin: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flex: 1
           }}
         >
-          {column.title}
+          {screenSize === 'mobile' ? column.title.split(' ')[0] : column.title}
         </h3>
         <span 
           id={`column-count-${column.key}`}
@@ -92,17 +117,18 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           style={{
             backgroundColor: '#6b7280',
             color: 'white',
-            padding: '4px 8px',
+            padding: screenSize === 'mobile' ? '2px 6px' : '4px 8px',
             borderRadius: '9999px',
-            fontSize: '12px',
-            fontWeight: '500'
+            fontSize: screenSize === 'mobile' ? '10px' : '12px',
+            fontWeight: '500',
+            marginLeft: '4px'
           }}
         >
           {tasks.length}
         </span>
       </div>
 
-      {/* Tasks Container - Consistent scrolling */}
+      {/* Tasks Container - Scrollable */}
       <div 
         id={`column-tasks-${column.key}`}
         className="jira-column-tasks scrollable"
@@ -111,8 +137,7 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           flex: 1,
           overflowY: 'auto',
           overflowX: 'hidden',
-          maxHeight: 'calc(100% - 60px)',
-          paddingRight: '4px'
+          paddingRight: '2px'
         }}
       >
         {tasks.map((task, taskIndex) => (
@@ -135,15 +160,15 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
             data-testid={`drop-zone-${column.key}`}
             style={{
               border: '2px dashed #3b82f6',
-              borderRadius: '8px',
-              padding: '16px',
+              borderRadius: '6px',
+              padding: screenSize === 'mobile' ? '8px' : '12px',
               textAlign: 'center',
               color: '#3b82f6',
               backgroundColor: '#dbeafe',
-              fontSize: '14px'
+              fontSize: screenSize === 'mobile' ? '10px' : '12px'
             }}
           >
-            Drop task here
+            Drop here
           </div>
         )}
         
@@ -155,9 +180,9 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
             data-testid={`empty-state-${column.key}`}
             style={{
               textAlign: 'center',
-              padding: '32px 16px',
+              padding: screenSize === 'mobile' ? '12px 4px' : '20px 8px',
               color: '#9ca3af',
-              fontSize: '12px'
+              fontSize: screenSize === 'mobile' ? '10px' : '11px'
             }}
           >
             No tasks

@@ -33,6 +33,36 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
     onEdit(task);
   };
 
+  // Responsive sizing
+  const getCardPadding = () => {
+    if (screenSize === 'mobile') return '6px';
+    if (screenSize === 'tablet') return '8px';
+    return '10px';
+  };
+
+  const getCardMargin = () => {
+    if (screenSize === 'mobile') return '4px';
+    return '6px';
+  };
+
+  const getTitleFontSize = () => {
+    if (screenSize === 'mobile') return '11px';
+    if (screenSize === 'tablet') return '12px';
+    return '13px';
+  };
+
+  const getDescriptionFontSize = () => {
+    if (screenSize === 'mobile') return '9px';
+    if (screenSize === 'tablet') return '10px';
+    return '11px';
+  };
+
+  const getIconSize = () => {
+    if (screenSize === 'mobile') return 12;
+    if (screenSize === 'tablet') return 14;
+    return 16;
+  };
+
   return (
     <div 
       id={`task-card-${task.id}`}
@@ -47,15 +77,16 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
       style={{
         backgroundColor: 'white',
         border: '1px solid #e5e7eb',
-        borderRadius: '8px',
-        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-        padding: '12px',
-        marginBottom: '8px',
+        borderRadius: '6px',
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+        padding: getCardPadding(),
+        marginBottom: getCardMargin(),
         cursor: 'grab',
         position: 'relative',
         transition: 'all 0.2s ease',
         opacity: isDragging ? 0.5 : 1,
-        transform: isDragging ? 'rotate(2deg) scale(1.05)' : 'none'
+        transform: isDragging ? 'rotate(1deg) scale(1.02)' : 'none',
+        fontSize: getTitleFontSize()
       }}
       draggable
       onDragStart={handleDragStart}
@@ -63,7 +94,7 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
       onMouseEnter={() => setShowMenu(true)}
       onMouseLeave={() => setShowMenu(false)}
     >
-      {/* Action Menu - Consistent positioning */}
+      {/* Action Menu - Responsive positioning */}
       {showMenu && (
         <div 
           id={`task-actions-${task.id}`}
@@ -71,15 +102,15 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
           data-testid={`task-actions-${task.id}`}
           style={{
             position: 'absolute',
-            top: '4px',
-            right: '4px',
+            top: '2px',
+            right: '2px',
             display: 'flex',
-            gap: '4px',
+            gap: screenSize === 'mobile' ? '2px' : '3px',
             zIndex: 20,
             backgroundColor: 'white',
-            borderRadius: '6px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-            padding: '4px'
+            borderRadius: '4px',
+            boxShadow: '0 1px 6px rgba(0,0,0,0.1)',
+            padding: screenSize === 'mobile' ? '2px' : '3px'
           }}
         >
           <button
@@ -91,9 +122,9 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
             onClick={handleEditClick}
             title="Edit task"
             style={{
-              padding: '4px',
+              padding: screenSize === 'mobile' ? '2px' : '3px',
               backgroundColor: '#dbeafe',
-              borderRadius: '4px',
+              borderRadius: '3px',
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
@@ -101,7 +132,7 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
               justifyContent: 'center'
             }}
           >
-            <Edit size={12} style={{ color: '#2563eb' }} />
+            <Edit size={screenSize === 'mobile' ? 10 : 11} style={{ color: '#2563eb' }} />
           </button>
           <button
             id={`delete-task-btn-${task.id}`}
@@ -112,9 +143,9 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
             onClick={handleDeleteClick}
             title="Delete task"
             style={{
-              padding: '4px',
+              padding: screenSize === 'mobile' ? '2px' : '3px',
               backgroundColor: '#fee2e2',
-              borderRadius: '4px',
+              borderRadius: '3px',
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
@@ -122,12 +153,12 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
               justifyContent: 'center'
             }}
           >
-            <Trash2 size={12} style={{ color: '#dc2626' }} />
+            <Trash2 size={screenSize === 'mobile' ? 10 : 11} style={{ color: '#dc2626' }} />
           </button>
         </div>
       )}
       
-      {/* Task Header - Consistent layout */}
+      {/* Task Header - Compact layout */}
       <div 
         id={`task-header-${task.id}`}
         className="jira-task-header"
@@ -135,12 +166,12 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          marginBottom: '8px'
+          gap: screenSize === 'mobile' ? '4px' : '6px',
+          marginBottom: screenSize === 'mobile' ? '4px' : '6px'
         }}
       >
         <IconComponent 
-          size={16} 
+          size={getIconSize()} 
           style={{ color: '#6b7280', flexShrink: 0 }} 
         />
         <span 
@@ -153,26 +184,27 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            fontSize: '14px',
-            color: '#374151'
+            fontSize: getTitleFontSize(),
+            color: '#374151',
+            lineHeight: 1.2
           }}
         >
           {task.title}
         </span>
       </div>
       
-      {/* Task Description - Consistent layout */}
+      {/* Task Description - Compact layout */}
       <p 
         id={`task-description-${task.id}`}
         className="jira-task-description"
         data-testid={`task-description-${task.id}`}
         style={{
           color: '#6b7280',
-          marginBottom: '12px',
-          fontSize: '12px',
-          lineHeight: '1.4',
+          marginBottom: screenSize === 'mobile' ? '6px' : '8px',
+          fontSize: getDescriptionFontSize(),
+          lineHeight: 1.3,
           display: '-webkit-box',
-          WebkitLineClamp: 2,
+          WebkitLineClamp: screenSize === 'mobile' ? 1 : 2,
           WebkitBoxOrient: 'vertical',
           overflow: 'hidden'
         }}
@@ -180,7 +212,7 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
         {task.description}
       </p>
       
-      {/* Task Footer - Consistent layout */}
+      {/* Task Footer - Compact layout */}
       <div 
         id={`task-footer-${task.id}`}
         className="jira-task-footer"
@@ -197,9 +229,9 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
           data-testid={`task-priority-${task.id}`}
           data-priority={task.priority}
           style={{
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '10px',
+            padding: screenSize === 'mobile' ? '2px 4px' : '3px 6px',
+            borderRadius: '3px',
+            fontSize: screenSize === 'mobile' ? '8px' : '9px',
             fontWeight: '500',
             textTransform: 'uppercase',
             color: task.priority === 'high' ? '#dc2626' : 
@@ -208,7 +240,7 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
                             task.priority === 'medium' ? '#fef3c7' : '#dcfce7'
           }}
         >
-          {task.priority}
+          {screenSize === 'mobile' ? task.priority.charAt(0).toUpperCase() : task.priority.toUpperCase()}
         </span>
         <div 
           id={`task-assignee-${task.id}`}
@@ -217,8 +249,8 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
           data-assignee={task.assignee}
           title={task.assignee}
           style={{
-            width: '24px',
-            height: '24px',
+            width: screenSize === 'mobile' ? '16px' : '20px',
+            height: screenSize === 'mobile' ? '16px' : '20px',
             backgroundColor: '#dbeafe',
             borderRadius: '50%',
             display: 'flex',
@@ -226,7 +258,7 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
             justifyContent: 'center'
           }}
         >
-          <User size={12} style={{ color: '#2563eb' }} />
+          <User size={screenSize === 'mobile' ? 8 : 10} style={{ color: '#2563eb' }} />
         </div>
       </div>
     </div>
