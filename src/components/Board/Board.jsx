@@ -7,23 +7,40 @@ const Board = ({ tasks, onEdit, onDelete, onMove, screenSize }) => {
     return tasks.filter(task => task.status === status);
   };
 
-  // Better responsive grid layout
-  const getGridColumns = () => {
-    if (screenSize === 'mobile') return 'repeat(2, 1fr)'; // 2 columns on mobile
-    if (screenSize === 'tablet') return 'repeat(4, 1fr)'; // 4 columns on tablet
-    return 'repeat(4, 1fr)'; // 4 columns on desktop
-  };
-
-  const getGridRows = () => {
-    if (screenSize === 'mobile') return 'repeat(2, 1fr)'; // 2 rows on mobile
-    return '1fr'; // Single row on tablet/desktop
-  };
-
-  // Better gap and padding for mobile
-  const getGap = () => {
-    if (screenSize === 'mobile') return '8px';
-    if (screenSize === 'tablet') return '12px';
-    return '16px';
+  // Fixed responsive layout - better breakpoints
+  const getLayoutConfig = () => {
+    const viewportWidth = window.innerWidth;
+    
+    // Mobile: 2x2 grid layout (much better UX)
+    if (screenSize === 'mobile' || viewportWidth <= 768) {
+      return {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gridTemplateRows: '1fr 1fr',
+        gap: '8px',
+        overflow: 'hidden'
+      };
+    }
+    
+    // Tablet: 2x2 grid layout
+    if (screenSize === 'tablet' || (viewportWidth > 768 && viewportWidth <= 1024)) {
+      return {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateRows: 'repeat(2, 1fr)',
+        gap: '12px',
+        overflow: 'hidden'
+      };
+    }
+    
+    // Desktop and larger screens: Always show all 4 columns in a row
+    return {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(4, 1fr)',
+      gridTemplateRows: '1fr',
+      gap: '16px',
+      overflow: 'hidden'
+    };
   };
 
   const getPadding = () => {
@@ -33,9 +50,11 @@ const Board = ({ tasks, onEdit, onDelete, onMove, screenSize }) => {
   };
 
   const getHeight = () => {
-    if (screenSize === 'mobile') return 'calc(100vh - 80px)';
-    return 'calc(100vh - 120px)';
+    // All screen sizes now use fixed height since we're using grid
+    return 'calc(100vh - 140px)';
   };
+
+  const layoutConfig = getLayoutConfig();
 
   return (
     <div 
@@ -43,17 +62,14 @@ const Board = ({ tasks, onEdit, onDelete, onMove, screenSize }) => {
       className="jira-board-grid"
       data-testid="kanban-board"
       style={{ 
-        display: 'grid',
-        gap: getGap(),
+        ...layoutConfig,
         height: getHeight(),
         padding: getPadding(),
-        gridTemplateColumns: getGridColumns(),
-        gridTemplateRows: getGridRows(),
-        background: '#f5f5f5',
-        overflow: 'hidden',
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
         width: '100%',
         boxSizing: 'border-box',
-        minHeight: '400px'
+        minHeight: '400px',
+        maxWidth: '100vw'
       }}
     >
       {STATUS_COLUMNS.map((column, index) => (

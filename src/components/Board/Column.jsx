@@ -41,21 +41,27 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
     }
   };
 
+  // Better responsive dimensions
   const getColumnHeight = () => {
-    if (screenSize === 'mobile') return 'calc((100vh - 80px) / 2 - 8px)';
-    return 'calc(100vh - 140px)';
+    if (screenSize === 'mobile') return 'calc(50vh - 90px)'; // Half screen height for 2x2 grid
+    if (screenSize === 'tablet') return 'calc(50vh - 100px)'; // Account for 2x2 grid
+    return 'calc(100vh - 180px)'; // Desktop full height
   };
 
   const getPadding = () => {
-    if (screenSize === 'mobile') return '12px';
-    if (screenSize === 'tablet') return '16px';
-    return '20px';
+    if (screenSize === 'mobile') return '8px';
+    if (screenSize === 'tablet') return '12px';
+    return '16px';
   };
 
   const getMinWidth = () => {
-    if (screenSize === 'mobile') return '160px';
-    if (screenSize === 'tablet') return '220px';
-    return '280px';
+    return '100%'; // Always take full available width
+  };
+
+  const getMaxHeight = () => {
+    if (screenSize === 'mobile') return 'calc(50vh - 90px)';
+    if (screenSize === 'tablet') return 'calc(50vh - 100px)';
+    return 'none';
   };
 
   const getColumnConfig = (columnKey) => {
@@ -136,19 +142,22 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
         display: 'flex',
         flexDirection: 'column',
         height: getColumnHeight(),
-        minHeight: screenSize === 'mobile' ? '200px' : '320px',
+        maxHeight: getMaxHeight(),
+        minHeight: screenSize === 'mobile' ? '150px' : '250px',
         minWidth: getMinWidth(),
+        width: '100%',
         border: isDragOver 
           ? `2px dashed ${columnConfig.accentColor}` 
           : `1px solid ${isHovered ? columnConfig.accentColor + '40' : '#e2e8f0'}`,
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         overflow: 'hidden',
         width: '100%',
         boxSizing: 'border-box',
         boxShadow: isHovered 
-          ? `0 8px 25px ${columnConfig.accentColor}20, 0 0 0 1px ${columnConfig.accentColor}30`
+          ? `0 12px 35px ${columnConfig.accentColor}25, 0 0 0 1px ${columnConfig.accentColor}40`
           : '0 2px 8px rgba(0,0,0,0.08)',
-        transform: isHovered ? 'translateY(-2px)' : 'none'
+        transform: isHovered ? 'translateY(-4px) scale(1.01)' : 'translateY(0) scale(1)',
+        marginBottom: '0' // No margin needed in grid layout
       }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -165,8 +174,9 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
         height: '60px',
         background: columnConfig.bg,
         borderRadius: '16px 16px 0 0',
-        opacity: 0.1,
-        transition: 'opacity 0.3s ease'
+        opacity: isHovered ? 0.15 : 0.08,
+        transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        transform: isHovered ? 'scaleX(1.02)' : 'scaleX(1)'
       }} />
 
       {/* Column Header */}
@@ -178,25 +188,28 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: screenSize === 'mobile' ? '12px' : '16px',
+          marginBottom: screenSize === 'mobile' ? '16px' : '20px',
           flexShrink: 0,
           minHeight: '40px',
           position: 'relative',
           zIndex: 1
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{
             background: columnConfig.bg,
-            borderRadius: '10px',
-            padding: '6px',
+            borderRadius: '12px',
+            padding: '8px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            minWidth: '32px',
-            height: '32px'
+            minWidth: '36px',
+            height: '36px',
+            transition: 'all 0.3s ease',
+            transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)',
+            boxShadow: isHovered ? `0 4px 12px ${columnConfig.accentColor}40` : 'none'
           }}>
-            <span style={{ fontSize: '16px' }}>{columnConfig.emoji}</span>
+            <span style={{ fontSize: '18px' }}>{columnConfig.emoji}</span>
           </div>
           <Title 
             level={5}
@@ -206,13 +219,15 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              fontSize: screenSize === 'mobile' ? '13px' : screenSize === 'tablet' ? '14px' : '16px',
+              fontSize: screenSize === 'mobile' ? '16px' : screenSize === 'tablet' ? '17px' : '18px',
               margin: 0,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               flex: 1,
-              lineHeight: '1.2'
+              lineHeight: '1.2',
+              transition: 'all 0.3s ease',
+              transform: isHovered ? 'translateX(2px)' : 'translateX(0)'
             }}
           >
             {getColumnTitle()}
@@ -225,16 +240,18 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
             background: columnConfig.bg,
             color: 'white',
             fontWeight: '600',
-            fontSize: '11px',
-            minWidth: '24px',
-            height: '24px',
-            borderRadius: '12px',
+            fontSize: '12px',
+            minWidth: '28px',
+            height: '28px',
+            borderRadius: '14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            transition: 'all 0.3s ease',
+            transform: isHovered ? 'scale(1.1)' : 'scale(1)'
           }}
-          size={screenSize === 'mobile' ? 'small' : 'default'}
+          size={screenSize === 'mobile' ? 'default' : 'default'}
         />
       </div>
 
@@ -248,7 +265,9 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           overflowY: 'auto',
           overflowX: 'hidden',
           minHeight: 0,
-          paddingRight: '4px'
+          paddingRight: '4px',
+          scrollbarWidth: 'thin',
+          scrollbarColor: `${columnConfig.accentColor}40 transparent`
         }}
       >
         {tasks.map((task, taskIndex) => (
@@ -268,29 +287,31 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           <div 
             style={{
               border: `3px dashed ${columnConfig.accentColor}`,
-              borderRadius: '12px',
-              padding: screenSize === 'mobile' ? '16px' : '24px',
+              borderRadius: '16px',
+              padding: screenSize === 'mobile' ? '20px' : '28px',
               textAlign: 'center',
-              background: `linear-gradient(135deg, ${columnConfig.accentColor}10, ${columnConfig.accentColor}05)`,
-              marginBottom: '12px',
-              animation: 'pulse 2s infinite'
+              background: `linear-gradient(135deg, ${columnConfig.accentColor}15, ${columnConfig.accentColor}08)`,
+              marginBottom: '16px',
+              animation: 'pulse 2s infinite',
+              backdropFilter: 'blur(10px)'
             }}
           >
             <div style={{
               background: columnConfig.bg,
               borderRadius: '50%',
-              width: '40px',
-              height: '40px',
+              width: '48px',
+              height: '48px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto 8px'
+              margin: '0 auto 12px',
+              boxShadow: `0 4px 12px ${columnConfig.accentColor}40`
             }}>
-              <PlusOutlined style={{ color: 'white', fontSize: '18px' }} />
+              <PlusOutlined style={{ color: 'white', fontSize: '20px' }} />
             </div>
             <Text style={{ 
               color: columnConfig.accentColor, 
-              fontSize: screenSize === 'mobile' ? '12px' : '14px',
+              fontSize: screenSize === 'mobile' ? '14px' : '16px',
               fontWeight: '600'
             }}>
               Drop task here
@@ -303,37 +324,41 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           <div 
             style={{
               textAlign: 'center',
-              padding: screenSize === 'mobile' ? '20px 12px' : '32px 16px',
-              borderRadius: '12px',
-              background: `linear-gradient(135deg, ${columnConfig.accentColor}08, ${columnConfig.accentColor}04)`,
-              border: `1px dashed ${columnConfig.accentColor}30`
+              padding: screenSize === 'mobile' ? '24px 16px' : '40px 20px',
+              borderRadius: '16px',
+              background: `linear-gradient(135deg, ${columnConfig.accentColor}12, ${columnConfig.accentColor}06)`,
+              border: `2px dashed ${columnConfig.accentColor}40`,
+              backdropFilter: 'blur(10px)'
             }}
           >
             <div style={{
               background: columnConfig.bg,
               borderRadius: '50%',
-              width: '48px',
-              height: '48px',
+              width: '56px',
+              height: '56px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto 12px',
-              opacity: 0.7
+              margin: '0 auto 16px',
+              opacity: 0.8,
+              boxShadow: `0 4px 12px ${columnConfig.accentColor}30`
             }}>
-              <span style={{ fontSize: '20px' }}>{columnConfig.emoji}</span>
+              <span style={{ fontSize: '24px' }}>{columnConfig.emoji}</span>
             </div>
             <Text type="secondary" style={{ 
-              fontSize: screenSize === 'mobile' ? '11px' : '13px',
-              color: columnConfig.accentColor + '80'
+              fontSize: screenSize === 'mobile' ? '14px' : '15px',
+              color: columnConfig.accentColor + '90',
+              fontWeight: '500',
+              display: 'block',
+              marginBottom: '4px'
             }}>
               No tasks yet
             </Text>
-            <br />
             <Text type="secondary" style={{ 
-              fontSize: screenSize === 'mobile' ? '10px' : '12px',
-              color: columnConfig.accentColor + '60'
+              fontSize: screenSize === 'mobile' ? '12px' : '13px',
+              color: columnConfig.accentColor + '70'
             }}>
-              Drag tasks here
+              Drag tasks here or create new ones
             </Text>
           </div>
         )}
@@ -342,8 +367,25 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
       <style jsx>{`
         @keyframes pulse {
           0% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.02); opacity: 0.8; }
+          50% { transform: scale(1.02); opacity: 0.9; }
           100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .scrollable::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        .scrollable::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        
+        .scrollable::-webkit-scrollbar-thumb {
+          background: ${columnConfig.accentColor}40;
+          border-radius: 3px;
+        }
+        
+        .scrollable::-webkit-scrollbar-thumb:hover {
+          background: ${columnConfig.accentColor}60;
         }
       `}</style>
     </div>

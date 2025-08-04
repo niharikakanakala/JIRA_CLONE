@@ -135,33 +135,63 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
     }
   };
 
+  // Fixed status configuration
+  const getStatusConfig = (status) => {
+    switch (status) {
+      case 'todo':
+        return {
+          progress: 0,
+          text: 'To Do',
+          color: '#8c8c8c',
+          progressColor: '#f0f0f0'
+        };
+      case 'progress':
+        return {
+          progress: 50,
+          text: 'In Progress',
+          color: '#faad14',
+          progressColor: '#faad14'
+        };
+      case 'review':
+        return {
+          progress: 80,
+          text: 'In Review',
+          color: '#1890ff',
+          progressColor: '#1890ff'
+        };
+      case 'done':
+        return {
+          progress: 100,
+          text: 'Completed',
+          color: '#52c41a',
+          progressColor: '#52c41a'
+        };
+      case 'backlog':
+        return {
+          progress: 0,
+          text: 'Backlog',
+          color: '#d9d9d9',
+          progressColor: '#f0f0f0'
+        };
+      default:
+        return {
+          progress: 0,
+          text: 'Unknown',
+          color: '#8c8c8c',
+          progressColor: '#f0f0f0'
+        };
+    }
+  };
+
   const priorityConfig = getPriorityConfig(task.priority);
   const typeConfig = getTypeConfig(task.type);
+  const statusConfig = getStatusConfig(task.status);
 
   const getPriorityText = (priority) => {
     if (screenSize === 'mobile') {
       return priorityConfig.emoji;
     }
     return `${priorityConfig.emoji} ${priority.toUpperCase()}`;
-  };
-
-  // Simulate task progress based on status
-  const getTaskProgress = () => {
-    switch (task.status) {
-      case 'todo': return 0;
-      case 'progress': return 50;
-      case 'review': return 80;
-      case 'done': return 100;
-      default: return 0;
-    }
-  };
-
-  const getProgressColor = () => {
-    const progress = getTaskProgress();
-    if (progress === 0) return '#f0f0f0';
-    if (progress <= 30) return '#ff4d4f';
-    if (progress <= 70) return '#faad14';
-    return '#52c41a';
   };
 
   return (
@@ -201,13 +231,13 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
         margin: getCardMargin(),
         cursor: 'grab',
         position: 'relative',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         opacity: isDragging ? 0.7 : 1,
         transform: isDragging 
           ? 'rotate(5deg) scale(1.05)' 
           : isHovered 
-          ? 'translateY(-2px) scale(1.02)' 
-          : 'none',
+          ? 'translateY(-3px) scale(1.02)' 
+          : 'translateY(0) scale(1)',
         minHeight: screenSize === 'mobile' ? '90px' : '110px',
         overflow: 'hidden'
       }}
@@ -232,28 +262,43 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
         height: '60px',
         background: `${typeConfig.bgGradient}`,
         borderRadius: '0 12px 0 60px',
-        opacity: 0.1,
-        transition: 'opacity 0.3s ease'
+        opacity: isHovered ? 0.15 : 0.08,
+        transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        transform: isHovered ? 'scale(1.2) rotate(10deg)' : 'scale(1) rotate(0deg)'
       }} />
 
-      {/* Progress indicator */}
+      {/* Progress indicator - Fixed to use actual status */}
       <div style={{
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
         height: '3px',
-        background: '#f0f0f0',
+        background: '#f5f5f5',
         borderRadius: '0 0 12px 12px'
       }}>
         <div style={{
           height: '100%',
-          background: getProgressColor(),
-          width: `${getTaskProgress()}%`,
-          transition: 'width 0.5s ease',
-          borderRadius: '0 0 12px 12px'
+          background: statusConfig.progressColor,
+          width: `${statusConfig.progress}%`,
+          transition: 'width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          borderRadius: '0 0 12px 12px',
+          boxShadow: statusConfig.progress > 0 ? `0 0 8px ${statusConfig.progressColor}40` : 'none'
         }} />
       </div>
+
+      {/* Status indicator dot */}
+      <div style={{
+        position: 'absolute',
+        top: '12px',
+        left: '12px',
+        width: '8px',
+        height: '8px',
+        background: statusConfig.color,
+        borderRadius: '50%',
+        boxShadow: `0 0 0 2px white, 0 0 8px ${statusConfig.color}40`,
+        transition: 'all 0.3s ease'
+      }} />
 
       {/* Action Menu */}
       {showMenu && screenSize !== 'mobile' && (
@@ -273,7 +318,7 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
             padding: '4px',
             transform: showMenu ? 'translateY(0) scale(1)' : 'translateY(-10px) scale(0.8)',
             opacity: showMenu ? 1 : 0,
-            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+            transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
           }}
         >
           <Space size={4}>
@@ -294,14 +339,14 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
               }}
               onMouseEnter={(e) => {
-                e.target.style.transform = 'scale(1.1)';
-                e.target.style.boxShadow = '0 4px 8px rgba(79, 172, 254, 0.4)';
+                e.target.style.transform = 'scale(1.15) rotate(5deg)';
+                e.target.style.boxShadow = '0 6px 12px rgba(79, 172, 254, 0.4)';
               }}
               onMouseLeave={(e) => {
-                e.target.style.transform = 'scale(1)';
+                e.target.style.transform = 'scale(1) rotate(0deg)';
                 e.target.style.boxShadow = 'none';
               }}
             />
@@ -322,14 +367,14 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
               }}
               onMouseEnter={(e) => {
-                e.target.style.transform = 'scale(1.1)';
-                e.target.style.boxShadow = '0 4px 8px rgba(255, 107, 107, 0.4)';
+                e.target.style.transform = 'scale(1.15) rotate(-5deg)';
+                e.target.style.boxShadow = '0 6px 12px rgba(255, 107, 107, 0.4)';
               }}
               onMouseLeave={(e) => {
-                e.target.style.transform = 'scale(1)';
+                e.target.style.transform = 'scale(1) rotate(0deg)';
                 e.target.style.boxShadow = 'none';
               }}
             />
@@ -346,7 +391,8 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: screenSize === 'mobile' ? '8px' : '10px'
+          marginBottom: screenSize === 'mobile' ? '8px' : '10px',
+          marginLeft: '16px' // Offset for status dot
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -356,7 +402,9 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
             padding: '4px',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            transition: 'all 0.3s ease',
+            transform: isHovered ? 'scale(1.1) rotate(5deg)' : 'scale(1) rotate(0deg)'
           }}>
             <IconComponent 
               size={getIconSize() - 4} 
@@ -371,7 +419,9 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
               borderRadius: '6px',
               fontWeight: '600',
               fontSize: screenSize === 'mobile' ? '10px' : '11px',
-              padding: '2px 8px'
+              padding: '2px 8px',
+              transition: 'all 0.3s ease',
+              transform: isHovered ? 'scale(1.05)' : 'scale(1)'
             }}
           >
             {getPriorityText(task.priority)}
@@ -391,7 +441,8 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
                 fontSize: '10px',
                 color: '#4facfe',
                 padding: 0,
-                minWidth: 'auto'
+                minWidth: 'auto',
+                transition: 'all 0.2s ease'
               }}
             />
             <Button
@@ -405,7 +456,8 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
                 fontSize: '10px',
                 color: '#ff6b6b',
                 padding: 0,
-                minWidth: 'auto'
+                minWidth: 'auto',
+                transition: 'all 0.2s ease'
               }}
             />
           </div>
@@ -426,7 +478,9 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
           background: 'linear-gradient(135deg, #1a202c, #2d3748)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
+          backgroundClip: 'text',
+          transition: 'all 0.3s ease',
+          transform: isHovered ? 'translateX(2px)' : 'translateX(0)'
         }}
       >
         {task.title}
@@ -443,14 +497,16 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
             color: '#4a5568',
             marginBottom: '12px',
             fontSize: getDescriptionFontSize(),
-            lineHeight: 1.5
+            lineHeight: 1.5,
+            transition: 'all 0.3s ease',
+            opacity: isHovered ? 0.8 : 0.7
           }}
         >
           {task.description}
         </Paragraph>
       )}
       
-      {/* Task Footer */}
+      {/* Task Footer - Fixed to show correct status */}
       <div 
         style={{
           display: 'flex',
@@ -461,10 +517,27 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <ClockCircleOutlined style={{ color: '#a0aec0', fontSize: '12px' }} />
-          <Text type="secondary" style={{ fontSize: '11px' }}>
-            {task.status === 'done' ? 'Completed' : 'In Progress'}
-          </Text>
+          <div style={{
+            background: statusConfig.color,
+            borderRadius: '4px',
+            padding: '2px 6px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            transition: 'all 0.3s ease',
+            transform: isHovered ? 'scale(1.05)' : 'scale(1)'
+          }}>
+            <ClockCircleOutlined style={{ color: 'white', fontSize: '10px' }} />
+            <Text style={{ 
+              color: 'white', 
+              fontSize: '10px', 
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}>
+              {statusConfig.text}
+            </Text>
+          </div>
         </div>
         
         <Avatar 
@@ -476,7 +549,9 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
             fontSize: screenSize === 'mobile' ? '10px' : '12px',
             fontWeight: '600',
             border: '2px solid white',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            transform: isHovered ? 'scale(1.1) rotate(-5deg)' : 'scale(1) rotate(0deg)'
           }}
           title={task.assignee || 'Unassigned'}
         >
