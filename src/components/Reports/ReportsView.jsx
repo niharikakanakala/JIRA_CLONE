@@ -268,7 +268,7 @@ const ReportsView = ({ allTasks, screenSize }) => {
         height: 'calc(100vh - 64px)',
         padding: screenSize === 'mobile' ? '16px' : '24px',
         overflow: 'auto',
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        background: 'linear-gradient(135deg, #521968ff 0%, #6695e0ff 100%)',
         minHeight: '100%'
       }}
     >
