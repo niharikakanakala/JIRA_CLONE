@@ -29,14 +29,30 @@ const BacklogView = ({ tasks, onEdit, onDelete, screenSize }) => {
         overflow: 'auto'
       }}
     >
-      <div style={{ marginBottom: '24px' }}>
-        <Title level={2} style={{ marginBottom: '8px', color: '#262626' }}>
+      <div style={{ 
+        marginTop: 0,
+        marginRight: 0,
+        marginBottom: '24px',
+        marginLeft: 0
+      }}>
+        <Title level={2} style={{ 
+          marginTop: 0,
+          marginRight: 0,
+          marginBottom: '8px',
+          marginLeft: 0,
+          color: '#262626' 
+        }}>
           Product Backlog
         </Title>
         <Text type="secondary" style={{ fontSize: '16px' }}>
           Manage your product backlog and plan future sprints
         </Text>
-        <div style={{ marginTop: '8px' }}>
+        <div style={{ 
+          marginTop: '8px',
+          marginRight: 0,
+          marginBottom: 0,
+          marginLeft: 0
+        }}>
           <Text type="secondary" style={{ fontSize: '14px' }}>
             Total items: {tasks.length} | Last updated: {formatDate(new Date().toISOString())}
           </Text>
@@ -56,12 +72,20 @@ const BacklogView = ({ tasks, onEdit, onDelete, screenSize }) => {
                 border: '1px solid #f0f0f0',
                 borderRadius: '8px'
               }}
-              bodyStyle={{ padding: '16px' }}
+              styles={{ body: { padding: '16px' } }}
               hoverable
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '8px', 
+                    marginTop: 0,
+                    marginRight: 0,
+                    marginBottom: '8px',
+                    marginLeft: 0
+                  }}>
                     <IconComponent size={16} style={{ color: '#8c8c8c' }} />
                     <Text strong style={{ fontSize: '16px' }}>{task.title}</Text>
                     <Tag color={getPriorityColor(task.priority)} size="small">
@@ -70,7 +94,13 @@ const BacklogView = ({ tasks, onEdit, onDelete, screenSize }) => {
                   </div>
                   <Paragraph 
                     type="secondary" 
-                    style={{ fontSize: '14px', marginBottom: '8px' }}
+                    style={{ 
+                      fontSize: '14px', 
+                      marginTop: 0,
+                      marginRight: 0,
+                      marginBottom: '8px',
+                      marginLeft: 0
+                    }}
                     ellipsis={{ rows: 2, expandable: false }}
                   >
                     {task.description}

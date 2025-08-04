@@ -42,14 +42,30 @@ const ReportsView = ({ allTasks, screenSize }) => {
         overflow: 'auto'
       }}
     >
-      <div style={{ marginBottom: '24px' }}>
-        <Title level={2} style={{ marginBottom: '8px', color: '#262626' }}>
+      <div style={{ 
+        marginTop: 0,
+        marginRight: 0,
+        marginBottom: '24px',
+        marginLeft: 0
+      }}>
+        <Title level={2} style={{ 
+          marginTop: 0,
+          marginRight: 0,
+          marginBottom: '8px',
+          marginLeft: 0,
+          color: '#262626' 
+        }}>
           Project Reports
         </Title>
         <Text type="secondary" style={{ fontSize: '16px' }}>
           Track your project progress and metrics
         </Text>
-        <div style={{ marginTop: '8px' }}>
+        <div style={{ 
+          marginTop: '8px',
+          marginRight: 0,
+          marginBottom: 0,
+          marginLeft: 0
+        }}>
           <Text type="secondary" style={{ fontSize: '14px' }}>
             Total Tasks: {totalTasks} | Board Tasks: {boardTasks.length} | Backlog: {backlogTasks.length}
           </Text>
@@ -57,10 +73,23 @@ const ReportsView = ({ allTasks, screenSize }) => {
       </div>
 
       {/* Project Summary Cards */}
-      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+      <Row gutter={[16, 16]} style={{ 
+        marginTop: 0,
+        marginRight: 0,
+        marginBottom: '24px',
+        marginLeft: 0
+      }}>
         <Col xs={12} sm={6}>
           <Card style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#1890ff', marginBottom: '8px' }}>
+            <div style={{ 
+              fontSize: '32px', 
+              fontWeight: 'bold', 
+              color: '#1890ff', 
+              marginTop: 0,
+              marginRight: 0,
+              marginBottom: '8px',
+              marginLeft: 0
+            }}>
               {totalTasks}
             </div>
             <Text type="secondary">Total Tasks</Text>
@@ -68,7 +97,15 @@ const ReportsView = ({ allTasks, screenSize }) => {
         </Col>
         <Col xs={12} sm={6}>
           <Card style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#52c41a', marginBottom: '8px' }}>
+            <div style={{ 
+              fontSize: '32px', 
+              fontWeight: 'bold', 
+              color: '#52c41a', 
+              marginTop: 0,
+              marginRight: 0,
+              marginBottom: '8px',
+              marginLeft: 0
+            }}>
               {statusCounts.done || 0}
             </div>
             <Text type="secondary">Completed</Text>
@@ -76,7 +113,15 @@ const ReportsView = ({ allTasks, screenSize }) => {
         </Col>
         <Col xs={12} sm={6}>
           <Card style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#faad14', marginBottom: '8px' }}>
+            <div style={{ 
+              fontSize: '32px', 
+              fontWeight: 'bold', 
+              color: '#faad14', 
+              marginTop: 0,
+              marginRight: 0,
+              marginBottom: '8px',
+              marginLeft: 0
+            }}>
               {statusCounts.progress || 0}
             </div>
             <Text type="secondary">In Progress</Text>
@@ -84,7 +129,15 @@ const ReportsView = ({ allTasks, screenSize }) => {
         </Col>
         <Col xs={12} sm={6}>
           <Card style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#8c8c8c', marginBottom: '8px' }}>
+            <div style={{ 
+              fontSize: '32px', 
+              fontWeight: 'bold', 
+              color: '#8c8c8c', 
+              marginTop: 0,
+              marginRight: 0,
+              marginBottom: '8px',
+              marginLeft: 0
+            }}>
               {backlogTasks.length}
             </div>
             <Text type="secondary">Backlog Items</Text>
@@ -93,14 +146,26 @@ const ReportsView = ({ allTasks, screenSize }) => {
       </Row>
 
       {/* Status Distribution */}
-      <Card title="Status Distribution" style={{ marginBottom: '24px' }}>
+      <Card title="Status Distribution" style={{ 
+        marginTop: 0,
+        marginRight: 0,
+        marginBottom: '24px',
+        marginLeft: 0
+      }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {STATUS_COLUMNS.map(column => {
             const count = statusCounts[column.key] || 0;
             const percentage = calculatePercentage(count, boardTasks.length);
             return (
               <div key={column.key}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  marginTop: 0,
+                  marginRight: 0,
+                  marginBottom: '8px',
+                  marginLeft: 0
+                }}>
                   <Text>{column.title}</Text>
                   <Text>
                     <strong>{count}</strong> ({percentage}%)
@@ -118,13 +183,25 @@ const ReportsView = ({ allTasks, screenSize }) => {
       </Card>
 
       {/* Priority Distribution */}
-      <Card title="Priority Distribution" style={{ marginBottom: '24px' }}>
+      <Card title="Priority Distribution" style={{ 
+        marginTop: 0,
+        marginRight: 0,
+        marginBottom: '24px',
+        marginLeft: 0
+      }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {Object.entries(priorityCounts).map(([priority, count]) => {
             const percentage = calculatePercentage(count, totalTasks);
             return (
               <div key={priority}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  marginTop: 0,
+                  marginRight: 0,
+                  marginBottom: '8px',
+                  marginLeft: 0
+                }}>
                   <Text style={{ textTransform: 'capitalize' }}>{priority} Priority</Text>
                   <Text>
                     <strong>{count}</strong> ({percentage}%)
@@ -142,7 +219,12 @@ const ReportsView = ({ allTasks, screenSize }) => {
       </Card>
 
       {/* Task Types Distribution */}
-      <Card title="Task Types Distribution" style={{ marginBottom: '24px' }}>
+      <Card title="Task Types Distribution" style={{ 
+        marginTop: 0,
+        marginRight: 0,
+        marginBottom: '24px',
+        marginLeft: 0
+      }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {Object.keys(TYPE_ICONS).map(type => {
             const count = allTasks.filter(task => task.type === type).length;
@@ -150,7 +232,15 @@ const ReportsView = ({ allTasks, screenSize }) => {
             const IconComponent = TYPE_ICONS[type];
             return (
               <div key={type}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  marginTop: 0,
+                  marginRight: 0,
+                  marginBottom: '8px',
+                  marginLeft: 0
+                }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <IconComponent size={16} />
                     <Text style={{ textTransform: 'capitalize' }}>{type}</Text>
@@ -171,7 +261,12 @@ const ReportsView = ({ allTasks, screenSize }) => {
       </Card>
 
       {/* Recent Activity */}
-      <Card title="Recent Activity" style={{ marginBottom: '100px' }}>
+      <Card title="Recent Activity" style={{ 
+        marginTop: 0,
+        marginRight: 0,
+        marginBottom: '100px',
+        marginLeft: 0
+      }}>
         {recentTasks.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {recentTasks.map(task => {

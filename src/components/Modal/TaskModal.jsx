@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Select, Button, Col, Row } from 'antd';
+import { Modal, Form, Input, Select, Button, Col, Row, message } from 'antd';
 import { STATUS_COLUMNS } from '../../utils/constants';
 import { generateId } from '../../utils/helpers';
 
@@ -11,15 +11,17 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (task) {
-      form.setFieldsValue({ ...task });
-    } else {
-      form.resetFields();
-      form.setFieldsValue({
-        status: 'todo',
-        priority: 'medium',
-        type: 'task'
-      });
+    if (visible) {
+      if (task) {
+        form.setFieldsValue({ ...task });
+      } else {
+        form.resetFields();
+        form.setFieldsValue({
+          status: 'todo',
+          priority: 'medium',
+          type: 'task'
+        });
+      }
     }
   }, [task, visible, form]);
 
@@ -29,11 +31,17 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
       const values = await form.validateFields();
       
       if (!values.title?.trim()) {
+        message.error('Please enter a task title');
+        setLoading(false);
         return;
       }
       
       const taskData = {
         ...values,
+        title: values.title.trim(),
+        description: values.description?.trim() || '',
+        assignee: values.assignee?.trim() || '',
+        reporter: values.reporter?.trim() || '',
         id: task?.id || generateId(),
         updated: new Date().toISOString(),
         created: task?.created || new Date().toISOString()
@@ -42,6 +50,7 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
       onSave(taskData);
       setLoading(false);
     } catch (error) {
+      console.error('Form validation failed:', error);
       setLoading(false);
     }
   };
@@ -51,14 +60,33 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
     onClose();
   };
 
+  // Better responsive width
+  const getModalWidth = () => {
+    if (screenSize === 'mobile') return '95%';
+    if (screenSize === 'tablet') return '85%';
+    return 650;
+  };
+
   return (
     <Modal
-      title={task ? 'Edit Task' : 'Create New Task'}
+      title={
+        <div style={{ fontSize: screenSize === 'mobile' ? '16px' : '18px', fontWeight: '600' }}>
+          {task ? 'Edit Task' : 'Create New Task'}
+        </div>
+      }
       open={visible}
       onCancel={handleCancel}
-      width={screenSize === 'mobile' ? '90%' : screenSize === 'tablet' ? '80%' : 600}
+      width={getModalWidth()}
+      centered
+      destroyOnHidden
+      maskClosable={false}
       footer={[
-        <Button key="cancel" onClick={handleCancel}>
+        <Button 
+          key="cancel" 
+          onClick={handleCancel}
+          size={screenSize === 'mobile' ? 'large' : 'middle'}
+          style={{ minWidth: screenSize === 'mobile' ? '80px' : '60px' }}
+        >
           Cancel
         </Button>,
         <Button
@@ -66,6 +94,8 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
           type="primary"
           loading={loading}
           onClick={handleSave}
+          size={screenSize === 'mobile' ? 'large' : 'middle'}
+          style={{ minWidth: screenSize === 'mobile' ? '80px' : '60px' }}
         >
           {task ? 'Update' : 'Create'}
         </Button>
@@ -79,37 +109,47 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
           priority: 'medium',
           type: 'task'
         }}
+        size={screenSize === 'mobile' ? 'large' : 'middle'}
       >
         <Form.Item
           name="title"
-          label="Title"
-          rules={[{ required: true, message: 'Please enter a title' }]}
+          label="Task Title"
+          rules={[
+            { required: true, message: 'Please enter a task title' },
+            { min: 3, message: 'Title must be at least 3 characters' },
+            { max: 100, message: 'Title cannot exceed 100 characters' }
+          ]}
         >
           <Input 
-            placeholder="Enter task title" 
+            placeholder="Enter a descriptive task title" 
             maxLength={100}
+            showCount={screenSize !== 'mobile'}
           />
         </Form.Item>
 
         <Form.Item
           name="description"
           label="Description"
+          rules={[
+            { max: 500, message: 'Description cannot exceed 500 characters' }
+          ]}
         >
           <TextArea
-            placeholder="Enter task description"
-            rows={3}
+            placeholder="Enter task description (optional)"
+            rows={screenSize === 'mobile' ? 2 : 3}
             maxLength={500}
+            showCount={screenSize !== 'mobile'}
           />
         </Form.Item>
 
-        <Row gutter={16}>
+        <Row gutter={[16, 16]}>
           <Col xs={24} sm={12}>
             <Form.Item
               name="status"
               label="Status"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: 'Please select a status' }]}
             >
-              <Select placeholder="Select status">
+              <Select placeholder="Select status" showSearch>
                 {STATUS_COLUMNS.map(col => (
                   <Option key={col.key} value={col.key}>
                     {col.title}
@@ -124,29 +164,29 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
             <Form.Item
               name="priority"
               label="Priority"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: 'Please select a priority' }]}
             >
-              <Select placeholder="Select priority">
-                <Option value="low">Low</Option>
-                <Option value="medium">Medium</Option>
-                <Option value="high">High</Option>
+              <Select placeholder="Select priority" showSearch>
+                <Option value="low">🟢 Low</Option>
+                <Option value="medium">🟡 Medium</Option>
+                <Option value="high">🔴 High</Option>
               </Select>
             </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={16}>
+        <Row gutter={[16, 16]}>
           <Col xs={24} sm={12}>
             <Form.Item
               name="type"
-              label="Type"
-              rules={[{ required: true }]}
+              label="Task Type"
+              rules={[{ required: true, message: 'Please select a task type' }]}
             >
-              <Select placeholder="Select type">
-                <Option value="story">Story</Option>
-                <Option value="bug">Bug</Option>
-                <Option value="task">Task</Option>
-                <Option value="feature">Feature</Option>
+              <Select placeholder="Select task type" showSearch>
+                <Option value="story">📖 Story</Option>
+                <Option value="bug">🐛 Bug</Option>
+                <Option value="task">✅ Task</Option>
+                <Option value="feature">⭐ Feature</Option>
               </Select>
             </Form.Item>
           </Col>
@@ -155,9 +195,12 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
             <Form.Item
               name="assignee"
               label="Assignee"
+              rules={[
+                { max: 50, message: 'Assignee name cannot exceed 50 characters' }
+              ]}
             >
               <Input 
-                placeholder="Enter assignee name"
+                placeholder="Enter assignee name (optional)"
                 maxLength={50}
               />
             </Form.Item>
@@ -167,9 +210,12 @@ const TaskModal = ({ visible, task, onClose, onSave, screenSize }) => {
         <Form.Item
           name="reporter"
           label="Reporter"
+          rules={[
+            { max: 50, message: 'Reporter name cannot exceed 50 characters' }
+          ]}
         >
           <Input 
-            placeholder="Enter reporter name"
+            placeholder="Enter reporter name (optional)"
             maxLength={50}
           />
         </Form.Item>

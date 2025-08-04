@@ -25,9 +25,9 @@ const MainLayout = () => {
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      if (width <= 499) {
+      if (width <= 768) {
         setScreenSize('mobile');
-      } else if (width <= 768) {
+      } else if (width <= 1024) {
         setScreenSize('tablet');
       } else {
         setScreenSize('desktop');
@@ -210,6 +210,12 @@ const MainLayout = () => {
     }
   };
 
+  // Fixed responsive sidebar width
+  const getSiderWidth = () => {
+    if (screenSize === 'mobile') return 70;
+    return 80; // Consistent compact width for all non-mobile screens
+  };
+
   return (
     <Layout 
       id="jira-clone-app"
@@ -223,8 +229,8 @@ const MainLayout = () => {
         id="toast-notifications-container"
         style={{
           position: 'fixed',
-          top: '16px',
-          left: '16px',
+          top: '80px',
+          right: '16px',
           zIndex: 1000,
           display: 'flex',
           flexDirection: 'column',
@@ -252,23 +258,23 @@ const MainLayout = () => {
       />
 
       <Layout style={{ height: 'calc(100vh - 64px)' }}>
-        {/* Use Ant Design Sider for proper layout */}
         <Sider
-          width={screenSize === 'mobile' ? 60 : 200}
+          width={getSiderWidth()}
           style={{
             background: 'white',
             borderRight: '1px solid #f0f0f0',
             height: '100%',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            flexShrink: 0
           }}
+          collapsible={false}
+          trigger={null}
         >
-          <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <Sidebar
-              currentView={currentView}
-              screenSize={screenSize}
-              onViewChange={setCurrentView}
-            />
-          </div>
+          <Sidebar
+            currentView={currentView}
+            screenSize={screenSize}
+            onViewChange={setCurrentView}
+          />
         </Sider>
 
         <Layout style={{ background: '#f5f5f5' }}>

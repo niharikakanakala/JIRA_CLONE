@@ -39,16 +39,22 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
     }
   };
 
-  // Calculate responsive dimensions
+  // Better responsive dimensions
   const getColumnHeight = () => {
-    if (screenSize === 'mobile') return 'calc((100vh - 100px) / 2 - 8px)'; // Half height for 2x2 grid
-    return 'calc(100vh - 120px)'; // Full height for single row
+    if (screenSize === 'mobile') return 'calc((100vh - 80px) / 2 - 8px)'; // Half height for 2x2 grid
+    return 'calc(100vh - 140px)'; // Full height for single row
   };
 
   const getPadding = () => {
-    if (screenSize === 'mobile') return '6px';
-    if (screenSize === 'tablet') return '8px';
-    return '12px';
+    if (screenSize === 'mobile') return '8px';
+    if (screenSize === 'tablet') return '12px';
+    return '16px';
+  };
+
+  const getMinWidth = () => {
+    if (screenSize === 'mobile') return '150px';
+    if (screenSize === 'tablet') return '200px';
+    return '250px';
   };
 
   const getColumnBackground = (columnKey) => {
@@ -59,6 +65,20 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
       case 'done': return '#e3fcef';
       default: return '#f7f8fc';
     }
+  };
+
+  // Better title handling
+  const getColumnTitle = () => {
+    if (screenSize === 'mobile') {
+      switch (column.title) {
+        case 'To Do': return 'To Do';
+        case 'In Progress': return 'Progress';
+        case 'In Review': return 'Review';
+        case 'Done': return 'Done';
+        default: return column.title;
+      }
+    }
+    return column.title;
   };
 
   return (
@@ -75,7 +95,8 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
         display: 'flex',
         flexDirection: 'column',
         height: getColumnHeight(),
-        minHeight: screenSize === 'mobile' ? '150px' : '200px',
+        minHeight: screenSize === 'mobile' ? '180px' : '300px',
+        minWidth: getMinWidth(),
         border: isDragOver ? '2px dashed #36b37e' : '1px solid #e1e4e9',
         transition: 'all 0.2s ease',
         overflow: 'hidden',
@@ -86,7 +107,7 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* Column Header - Compact for mobile */}
+      {/* Column Header */}
       <div 
         id={`column-header-${column.key}`}
         className="jira-column-header"
@@ -95,8 +116,12 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: screenSize === 'mobile' ? '6px' : '12px',
-          flexShrink: 0
+          marginTop: 0,
+          marginRight: 0,
+          marginBottom: screenSize === 'mobile' ? '8px' : '12px',
+          marginLeft: 0,
+          flexShrink: 0,
+          minHeight: '24px'
         }}
       >
         <Title 
@@ -107,15 +132,19 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           style={{
             fontWeight: '600',
             color: '#172b4d',
-            fontSize: screenSize === 'mobile' ? '12px' : '14px',
-            margin: 0,
+            fontSize: screenSize === 'mobile' ? '12px' : screenSize === 'tablet' ? '13px' : '14px',
+            marginTop: 0,
+            marginRight: 0,
+            marginBottom: 0,
+            marginLeft: 0,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            flex: 1
+            flex: 1,
+            lineHeight: '1.2'
           }}
         >
-          {screenSize === 'mobile' ? column.title.split(' ')[0] : column.title}
+          {getColumnTitle()}
         </Title>
         <Badge 
           id={`column-count-${column.key}`}
@@ -126,8 +155,12 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           style={{
             backgroundColor: '#ddd',
             color: '#666',
+            marginTop: 0,
+            marginRight: 0,
+            marginBottom: 0,
             marginLeft: '8px'
           }}
+          size={screenSize === 'mobile' ? 'small' : 'default'}
         />
       </div>
 
@@ -140,7 +173,8 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           flex: 1,
           overflowY: 'auto',
           overflowX: 'hidden',
-          minHeight: 0
+          minHeight: 0,
+          paddingRight: '2px'
         }}
       >
         {tasks.map((task, taskIndex) => (
@@ -168,11 +202,16 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
               textAlign: 'center',
               color: '#36b37e',
               backgroundColor: '#e3fcef',
-              fontSize: screenSize === 'mobile' ? '10px' : '12px',
-              marginBottom: '8px'
+              fontSize: screenSize === 'mobile' ? '11px' : '12px',
+              marginTop: 0,
+              marginRight: 0,
+              marginBottom: '8px',
+              marginLeft: 0
             }}
           >
-            <Text style={{ color: '#36b37e' }}>Drop here</Text>
+            <Text style={{ color: '#36b37e', fontSize: screenSize === 'mobile' ? '11px' : '12px' }}>
+              Drop task here
+            </Text>
           </div>
         )}
         
@@ -184,7 +223,7 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
             data-testid={`empty-state-${column.key}`}
             style={{
               textAlign: 'center',
-              padding: screenSize === 'mobile' ? '12px 4px' : '20px 8px'
+              padding: screenSize === 'mobile' ? '12px 8px' : '20px 8px'
             }}
           >
             <Empty 

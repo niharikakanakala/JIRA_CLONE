@@ -7,9 +7,9 @@ const Board = ({ tasks, onEdit, onDelete, onMove, screenSize }) => {
     return tasks.filter(task => task.status === status);
   };
 
-  // Calculate responsive grid based on screen size
+  // Better responsive grid layout
   const getGridColumns = () => {
-    if (screenSize === 'mobile') return 'repeat(2, 1fr)'; // 2x2 grid on mobile
+    if (screenSize === 'mobile') return 'repeat(2, 1fr)'; // 2 columns on mobile
     if (screenSize === 'tablet') return 'repeat(4, 1fr)'; // 4 columns on tablet
     return 'repeat(4, 1fr)'; // 4 columns on desktop
   };
@@ -19,6 +19,24 @@ const Board = ({ tasks, onEdit, onDelete, onMove, screenSize }) => {
     return '1fr'; // Single row on tablet/desktop
   };
 
+  // Better gap and padding for mobile
+  const getGap = () => {
+    if (screenSize === 'mobile') return '8px';
+    if (screenSize === 'tablet') return '12px';
+    return '16px';
+  };
+
+  const getPadding = () => {
+    if (screenSize === 'mobile') return '8px';
+    if (screenSize === 'tablet') return '12px';
+    return '16px';
+  };
+
+  const getHeight = () => {
+    if (screenSize === 'mobile') return 'calc(100vh - 80px)';
+    return 'calc(100vh - 120px)';
+  };
+
   return (
     <div 
       id="kanban-board"
@@ -26,15 +44,16 @@ const Board = ({ tasks, onEdit, onDelete, onMove, screenSize }) => {
       data-testid="kanban-board"
       style={{ 
         display: 'grid',
-        gap: screenSize === 'mobile' ? '8px' : '12px',
-        height: 'calc(100vh - 120px)',
-        padding: screenSize === 'mobile' ? '8px' : '12px',
+        gap: getGap(),
+        height: getHeight(),
+        padding: getPadding(),
         gridTemplateColumns: getGridColumns(),
         gridTemplateRows: getGridRows(),
         background: '#f5f5f5',
         overflow: 'hidden',
         width: '100%',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        minHeight: '400px'
       }}
     >
       {STATUS_COLUMNS.map((column, index) => (
