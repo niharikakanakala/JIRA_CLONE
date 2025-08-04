@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, Row, Col, Progress, Typography, Empty, Statistic, Badge } from 'antd';
 import { TrophyOutlined, RocketOutlined, ClockCircleOutlined, TeamOutlined } from '@ant-design/icons';
 import { AlertCircle } from 'lucide-react';
@@ -8,7 +8,6 @@ import { formatDate, sortTasksByDate, calculatePercentage } from '../../utils/he
 const { Title, Text } = Typography;
 
 const ReportsView = ({ allTasks, screenSize }) => {
-  const [animatedCounts, setAnimatedCounts] = useState({});
   const [hoveredCard, setHoveredCard] = useState(null);
   
   const boardTasks = allTasks.filter(task => task.status !== 'backlog');
@@ -26,34 +25,6 @@ const ReportsView = ({ allTasks, screenSize }) => {
 
   const recentTasks = sortTasksByDate(allTasks, 'updated', 'desc').slice(0, 12);
   const totalTasks = allTasks.length;
-
-  // Animate counters on mount
-  useEffect(() => {
-    const counts = {
-      total: totalTasks,
-      completed: statusCounts.done || 0,
-      progress: statusCounts.progress || 0,
-      backlog: backlogTasks.length
-    };
-    
-    // Animate each counter
-    Object.keys(counts).forEach(key => {
-      let start = 0;
-      const end = counts[key];
-      const duration = 1500;
-      const increment = end / (duration / 16);
-      
-      const timer = setInterval(() => {
-        start += increment;
-        if (start >= end) {
-          setAnimatedCounts(prev => ({ ...prev, [key]: end }));
-          clearInterval(timer);
-        } else {
-          setAnimatedCounts(prev => ({ ...prev, [key]: Math.floor(start) }));
-        }
-      }, 16);
-    });
-  }, [totalTasks, statusCounts.done, statusCounts.progress, backlogTasks.length]);
 
   const getProgressColor = (type) => {
     switch (type) {
@@ -105,19 +76,21 @@ const ReportsView = ({ allTasks, screenSize }) => {
     
     return (
       <Card
+        data-testid={`stat-card-${type}`}
         style={{
           background: isHovered 
-            ? `linear-gradient(135deg, ${config.color}10, ${config.color}05)`
+            ? `linear-gradient(135deg, ${config.color}15, ${config.color}08)`
             : 'white',
-          border: `1px solid ${isHovered ? config.color + '40' : '#f0f0f0'}`,
+          border: `1px solid ${isHovered ? config.color + '50' : '#f0f0f0'}`,
           borderRadius: '16px',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          transform: isHovered ? 'translateY(-4px) scale(1.02)' : 'none',
+          transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          transform: isHovered ? 'translateY(-6px) scale(1.03)' : 'translateY(0) scale(1)',
           boxShadow: isHovered 
-            ? `0 8px 25px ${config.color}20, 0 0 0 1px ${config.color}30`
+            ? `0 12px 35px ${config.color}25, 0 0 0 1px ${config.color}40`
             : '0 2px 8px rgba(0,0,0,0.06)',
           overflow: 'hidden',
-          position: 'relative'
+          position: 'relative',
+          cursor: 'pointer'
         }}
         onMouseEnter={() => setHoveredCard(`stat-${index}`)}
         onMouseLeave={() => setHoveredCard(null)}
@@ -125,15 +98,29 @@ const ReportsView = ({ allTasks, screenSize }) => {
         {/* Animated background pattern */}
         <div style={{
           position: 'absolute',
-          top: '-20px',
-          right: '-20px',
-          width: '80px',
-          height: '80px',
+          top: '-30px',
+          right: '-30px',
+          width: '100px',
+          height: '100px',
           background: config.gradient,
           borderRadius: '50%',
-          opacity: 0.1,
-          transition: 'all 0.3s ease',
-          transform: isHovered ? 'scale(1.2)' : 'scale(1)'
+          opacity: isHovered ? 0.15 : 0.08,
+          transition: 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          transform: isHovered ? 'scale(1.4) rotate(15deg)' : 'scale(1) rotate(0deg)'
+        }} />
+        
+        {/* Additional floating element */}
+        <div style={{
+          position: 'absolute',
+          bottom: '-15px',
+          left: '-15px',
+          width: '60px',
+          height: '60px',
+          background: `linear-gradient(45deg, ${config.color}20, ${config.color}10)`,
+          borderRadius: '50%',
+          opacity: isHovered ? 0.12 : 0.05,
+          transition: 'all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          transform: isHovered ? 'scale(1.3) rotate(-10deg)' : 'scale(1) rotate(0deg)'
         }} />
         
         <div style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
@@ -145,25 +132,37 @@ const ReportsView = ({ allTasks, screenSize }) => {
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: '12px',
-            transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-            transition: 'transform 0.3s ease'
+            transform: isHovered ? 'scale(1.15) rotate(5deg)' : 'scale(1) rotate(0deg)',
+            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            boxShadow: isHovered ? `0 8px 20px ${config.color}30` : '0 2px 8px rgba(0,0,0,0.1)'
           }}>
             {React.cloneElement(config.icon, { 
               style: { color: 'white', fontSize: '24px' } 
             })}
           </div>
           <Statistic
-            value={animatedCounts[type] || 0}
+            data-testid={`stat-value-${type}`}
+            value={value} // Direct value, no animation
             valueStyle={{
               fontSize: screenSize === 'mobile' ? '28px' : '36px',
               fontWeight: 'bold',
               background: config.gradient,
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
+              backgroundClip: 'text',
+              transition: 'all 0.3s ease',
+              transform: isHovered ? 'scale(1.05)' : 'scale(1)'
             }}
           />
-          <Text type="secondary" style={{ fontSize: '14px', fontWeight: '500' }}>
+          <Text 
+            type="secondary" 
+            style={{ 
+              fontSize: '14px', 
+              fontWeight: '500',
+              transition: 'all 0.3s ease',
+              color: isHovered ? config.color : undefined
+            }}
+          >
             {title}
           </Text>
         </div>
@@ -264,6 +263,7 @@ const ReportsView = ({ allTasks, screenSize }) => {
     <div 
       id="reports-view" 
       className="reports-container scrollable"
+      data-testid="reports-view"
       style={{ 
         height: 'calc(100vh - 64px)',
         padding: screenSize === 'mobile' ? '16px' : '24px',
@@ -286,28 +286,6 @@ const ReportsView = ({ allTasks, screenSize }) => {
           position: 'relative',
           overflow: 'hidden'
         }}>
-          {/* Animated background elements */}
-          <div style={{
-            position: 'absolute',
-            top: '-50px',
-            right: '-50px',
-            width: '100px',
-            height: '100px',
-            background: 'rgba(255,255,255,0.1)',
-            borderRadius: '50%',
-            animation: 'float 6s ease-in-out infinite'
-          }} />
-          <div style={{
-            position: 'absolute',
-            bottom: '-30px',
-            left: '-30px',
-            width: '80px',
-            height: '80px',
-            background: 'rgba(255,255,255,0.05)',
-            borderRadius: '50%',
-            animation: 'float 8s ease-in-out infinite reverse'
-          }} />
-          
           <Title level={1} style={{ 
             color: 'white',
             margin: 0,
@@ -332,21 +310,24 @@ const ReportsView = ({ allTasks, screenSize }) => {
             position: 'relative',
             zIndex: 1
           }}>
-            <Text style={{ 
-              color: 'rgba(255,255,255,0.8)', 
-              fontSize: '14px',
-              background: 'rgba(255,255,255,0.1)',
-              padding: '4px 12px',
-              borderRadius: '20px',
-              backdropFilter: 'blur(10px)'
-            }}>
+            <Text 
+              data-testid="summary-stats"
+              style={{ 
+                color: 'rgba(255,255,255,0.8)', 
+                fontSize: '14px',
+                background: 'rgba(255,255,255,0.1)',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                backdropFilter: 'blur(10px)'
+              }}
+            >
               Total: {totalTasks} tasks | Active: {boardTasks.length} | Backlog: {backlogTasks.length}
             </Text>
           </div>
         </div>
       </div>
 
-      {/* Animated Statistics Cards */}
+      {/* Statistics Cards - No Animation */}
       <Row gutter={[16, 16]} style={{ marginBottom: '32px' }}>
         <Col xs={12} sm={6}>
           <StatCard title="Total Tasks" value={totalTasks} type="total" index={0} />
@@ -362,7 +343,7 @@ const ReportsView = ({ allTasks, screenSize }) => {
         </Col>
       </Row>
 
-      {/* Enhanced Progress Cards */}
+      {/* Progress Cards */}
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={12}>
           <ProgressCard
@@ -427,23 +408,31 @@ const ReportsView = ({ allTasks, screenSize }) => {
             
             return (
               <Col xs={12} sm={6} key={type}>
-                <div style={{
-                  background: 'white',
-                  border: `1px solid ${typeColors[type]}20`,
-                  borderRadius: '12px',
-                  padding: '16px',
-                  textAlign: 'center',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = `0 4px 12px ${typeColors[type]}30`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
+                <div 
+                  data-testid={`task-type-${type}`}
+                  style={{
+                    background: 'white',
+                    border: `1px solid ${typeColors[type]}20`,
+                    borderRadius: '12px',
+                    padding: '16px',
+                    textAlign: 'center',
+                    transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
+                    e.currentTarget.style.boxShadow = `0 8px 25px ${typeColors[type]}25`;
+                    e.currentTarget.style.borderColor = `${typeColors[type]}40`;
+                    e.currentTarget.style.background = `linear-gradient(135deg, ${typeColors[type]}08, ${typeColors[type]}04)`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.borderColor = `${typeColors[type]}20`;
+                    e.currentTarget.style.background = 'white';
+                  }}
                 >
                   <div style={{
                     background: `linear-gradient(135deg, ${typeColors[type]}, ${typeColors[type]}80)`,
@@ -456,7 +445,10 @@ const ReportsView = ({ allTasks, screenSize }) => {
                   }}>
                     <IconComponent size={20} style={{ color: 'white' }} />
                   </div>
-                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: typeColors[type] }}>
+                  <div 
+                    data-testid={`task-type-count-${type}`}
+                    style={{ fontSize: '20px', fontWeight: 'bold', color: typeColors[type] }}
+                  >
                     {count}
                   </div>
                   <Text style={{ textTransform: 'capitalize', fontSize: '12px' }}>
@@ -469,8 +461,9 @@ const ReportsView = ({ allTasks, screenSize }) => {
         </Row>
       </Card>
 
-      {/* Enhanced Recent Activity */}
+      {/* Recent Activity */}
       <Card 
+        data-testid="recent-activity"
         title={
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{
@@ -510,6 +503,7 @@ const ReportsView = ({ allTasks, screenSize }) => {
               return (
                 <div 
                   key={task.id}
+                  data-testid={`recent-task-${index}`}
                   style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between', 
@@ -518,8 +512,7 @@ const ReportsView = ({ allTasks, screenSize }) => {
                     borderRadius: '12px',
                     border: '1px solid #f0f0f0',
                     background: 'linear-gradient(135deg, #ffffff, #f8fafc)',
-                    transition: 'all 0.3s ease',
-                    animation: `slideIn 0.3s ease ${index * 0.1}s both`
+                    transition: 'all 0.3s ease'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateX(4px)';
@@ -579,26 +572,6 @@ const ReportsView = ({ allTasks, screenSize }) => {
           />
         )}
       </Card>
-
-      <style jsx>{`
-        @keyframes float {
-          0% { transform: translateY(0px) rotate(0deg); }
-          33% { transform: translateY(-10px) rotate(1deg); }
-          66% { transform: translateY(5px) rotate(-1deg); }
-          100% { transform: translateY(0px) rotate(0deg); }
-        }
-        
-        @keyframes slideIn {
-          from { 
-            transform: translateX(-20px); 
-            opacity: 0; 
-          }
-          to { 
-            transform: translateX(0); 
-            opacity: 1; 
-          }
-        }
-      `}</style>
     </div>
   );
 };
