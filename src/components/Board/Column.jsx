@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge, Typography, Empty } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import TaskCard from './TaskCard';
@@ -8,6 +8,44 @@ const { Text, Title } = Typography;
 const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnIndex }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Add CSS animations to document head once
+  useEffect(() => {
+    const styleId = 'column-animations';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.02); opacity: 0.9; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .jira-column-content::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        .jira-column-content::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        
+        .jira-column-content::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 3px;
+        }
+        
+        .jira-column-content::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .pulse-animation {
+          animation: pulse 2s infinite;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -151,7 +189,6 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           : `1px solid ${isHovered ? columnConfig.accentColor + '40' : '#e2e8f0'}`,
         transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         overflow: 'hidden',
-        width: '100%',
         boxSizing: 'border-box',
         boxShadow: isHovered 
           ? `0 12px 35px ${columnConfig.accentColor}25, 0 0 0 1px ${columnConfig.accentColor}40`
@@ -258,7 +295,7 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
       {/* Tasks Container */}
       <div 
         id={`column-tasks-${column.key}`}
-        className="jira-column-content scrollable"
+        className="jira-column-content"
         data-testid={`column-tasks-${column.key}`}
         style={{
           flex: 1,
@@ -276,6 +313,7 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
             task={task}
             onEdit={onEdit}
             onDelete={onDelete}
+            onMove={onMove}
             screenSize={screenSize}
             taskIndex={taskIndex}
             columnStatus={column.key}
@@ -285,6 +323,7 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
         {/* Enhanced Drop Zone */}
         {isDragOver && (
           <div 
+            className="pulse-animation"
             style={{
               border: `3px dashed ${columnConfig.accentColor}`,
               borderRadius: '16px',
@@ -292,7 +331,6 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
               textAlign: 'center',
               background: `linear-gradient(135deg, ${columnConfig.accentColor}15, ${columnConfig.accentColor}08)`,
               marginBottom: '16px',
-              animation: 'pulse 2s infinite',
               backdropFilter: 'blur(10px)'
             }}
           >
@@ -363,31 +401,6 @@ const Column = ({ column, tasks, onEdit, onDelete, onMove, screenSize, columnInd
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        @keyframes pulse {
-          0% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.02); opacity: 0.9; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        
-        .scrollable::-webkit-scrollbar {
-          width: 6px;
-        }
-        
-        .scrollable::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        
-        .scrollable::-webkit-scrollbar-thumb {
-          background: ${columnConfig.accentColor}40;
-          border-radius: 3px;
-        }
-        
-        .scrollable::-webkit-scrollbar-thumb:hover {
-          background: ${columnConfig.accentColor}60;
-        }
-      `}</style>
     </div>
   );
 };

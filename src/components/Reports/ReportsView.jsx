@@ -246,7 +246,7 @@ const ReportsView = ({ allTasks, screenSize }) => {
                     '100%': color + '80'
                   }}
                   trailColor="#f0f0f0"
-                  strokeWidth={8}
+                  size={8}
                   style={{
                     marginBottom: '4px'
                   }}

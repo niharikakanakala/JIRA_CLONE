@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Button, Tag, Avatar, Typography, Space, Progress } from 'antd';
-import { EditOutlined, DeleteOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, UserOutlined, ClockCircleOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { TYPE_ICONS } from '../../utils/constants';
 
 const { Text, Paragraph } = Typography;
 
-const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus }) => {
+const TaskCard = ({ task, onEdit, onDelete, onMove, screenSize, taskIndex, columnStatus }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -35,6 +35,43 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
     e.stopPropagation();
     e.preventDefault();
     onEdit(task);
+  };
+
+  const handleNextProcessClick = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const nextStatus = getNextStatus(task.status);
+    if (nextStatus && onMove) {
+      onMove(task.id, nextStatus, task.status);
+    }
+  };
+
+  // Get the next status in the workflow
+  const getNextStatus = (currentStatus) => {
+    const statusFlow = {
+      'todo': 'progress',
+      'progress': 'review', 
+      'review': 'done',
+      'done': null // No next status after done
+    };
+    return statusFlow[currentStatus];
+  };
+
+  // Check if task can move to next status
+  const canMoveToNext = () => {
+    return getNextStatus(task.status) !== null;
+  };
+
+  // Get next status display name
+  const getNextStatusName = () => {
+    const nextStatus = getNextStatus(task.status);
+    const statusNames = {
+      'progress': 'In Progress',
+      'review': 'In Review',
+      'done': 'Done'
+    };
+    return statusNames[nextStatus] || '';
   };
 
   // Better responsive sizing
@@ -322,6 +359,37 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
           }}
         >
           <Space size={4}>
+            {/* Next Process Button - Only show if not done */}
+            {canMoveToNext() && (
+              <Button
+                id={`next-process-btn-${task.id}`}
+                type="text"
+                size="small"
+                icon={<ArrowRightOutlined />}
+                onClick={handleNextProcessClick}
+                title={`Move to ${getNextStatusName()}`}
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  background: 'linear-gradient(135deg, #52c41a, #389e0d)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'scale(1.15) rotate(5deg)';
+                  e.target.style.boxShadow = '0 6px 12px rgba(82, 196, 26, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'scale(1) rotate(0deg)';
+                  e.target.style.boxShadow = 'none';
+                }}
+              />
+            )}
             <Button
               id={`edit-task-btn-${task.id}`}
               type="text"
@@ -430,6 +498,25 @@ const TaskCard = ({ task, onEdit, onDelete, screenSize, taskIndex, columnStatus 
         
         {screenSize === 'mobile' && (
           <div style={{ display: 'flex', gap: '4px' }}>
+            {/* Next Process Button for Mobile - Only show if not done */}
+            {canMoveToNext() && (
+              <Button
+                type="text"
+                size="small"
+                icon={<ArrowRightOutlined />}
+                onClick={handleNextProcessClick}
+                title={`Move to ${getNextStatusName()}`}
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  fontSize: '10px',
+                  color: '#52c41a',
+                  padding: 0,
+                  minWidth: 'auto',
+                  transition: 'all 0.2s ease'
+                }}
+              />
+            )}
             <Button
               type="text"
               size="small"
